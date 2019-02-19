@@ -25,8 +25,10 @@ class TransactionOutput:
 
     def to_dict(self):
         d = {
+            'sender_address': self.sender_address
             'recipient_address': self.recipient,
             'amount': self.amount
+
         }
         return d
 
@@ -44,7 +46,7 @@ class Transaction:
         self.transaction_id =  #το hash του transaction
         self.transaction_inputs: #λίστα από Transaction Input
         self.transaction_outputs: #λίστα από Transaction Output
-        selfSignature
+        self.signature
 
 
     
@@ -57,4 +59,7 @@ class Transaction:
         """
         Sign transaction with private key
         """
-       
+       private_key = RSA.importKey(binascii.unhexlify(self.sender_private_key))
+       signer = PKCS1_v1_5.new(private_key)
+       h = SHA.new(str(self.to_dict()).encode('utf8'))
+       return binascii.hexlify(signer.sign(h)).decode('ascii')

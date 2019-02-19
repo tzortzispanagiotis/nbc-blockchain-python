@@ -33,7 +33,7 @@ class Wallet:
 		return binascii.hexlify(signed).decode('ascii')
 
 
-	def balance(self, transactions):
+	def balance(self,transactions):
 		balance = 0
 		for tx in transactions:
 			#for transa
