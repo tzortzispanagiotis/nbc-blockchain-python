@@ -27,11 +27,6 @@ class Wallet:
 		#self_address
 		#self.transactions
 
-	def sign_message(self, message):
-		hash = SHA.new(message.encode('utf8'))
-		signed = self._signer.sign(hash)
-		return binascii.hexlify(signed).decode('ascii')
-
 
 	def balance(self,transactions):
 		balance = 0

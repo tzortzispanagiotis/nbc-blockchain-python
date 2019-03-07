@@ -52,7 +52,15 @@ class Transaction:
     
 
 
-    def to_dict(self):
+    def to_dict1(self,include_signature=True):
+        d = {
+            "inputs": list(map(TransactionInput.to_dict, self.inputs)),
+            "outputs": list(map(TransactionOutput.to_dict, self.outputs)),
+        
+        }
+        if include_signature:
+            d["signature"] = self.signature
+        return d
         
 
     def sign_transaction(self):

@@ -4,7 +4,7 @@ class Node: #creation of bootstap node
 	def __init__(self):
 		#self.NBC=100
 		##set
-		self.current_block  #san transaction pool me transactions<=maximum
+		self.current_block  = [] #san transaction pool me transactions<=maximum
 		self.chain = []
 		#self.current_id_count
 		self.wallet = create_wallet()
@@ -35,8 +35,13 @@ class Node: #creation of bootstap node
 	def broadcast_transaction():
 
 
-	def verify_signature(sender_address, message, signature):
-    
+	def verify_signature(transaction):
+		tr = to_dict1(transaction , True)
+		pubkey= RSA.importKey(binascii.unhexlify(tra)
+	    verifier = PKCS1_v1_5.new(pubkey)
+		h = SHA.new(message.encode('utf8'))
+	    return verifier.verify(h, binascii.unhexlify(transaction.signature))
+
 
 
 	def validate_transaction(transaction):
@@ -51,22 +56,26 @@ class Node: #creation of bootstap node
             	logging.error("Invalid parent transaction")
             	return False
 		}
+		return True
 
 	def add_transaction_to_block(current_block , transaction , previousHash): 
 		#if
 		#if enough transactions  mine
-		if (len(current_block) == max_transactions):
-			new_block = Block(previousHash , current_block)
-			mine_block(new_block)
-		
-		else:
-			current_block.append(transaction)
+		if validate_transaction(transaction):
+		{
+			if (len(current_block) == max_transactions):
+				new_block = Block(previousHash , current_block)
+				mine_block(new_block)
+			
+		    else:
+				current_block.append(transaction)
+		}
 
 
 
-	def mine_block( block ):
+	def mine_block( block , self  ):
 		 last_block = self.chain[-1]
-		 last_block = to_dict(last_block)
+		 message = to_dict(last_block)
 		 nonce = self.valid_proof(message)
 		 block.add_nonce(nonce)
 		 self.broadcast_block()
@@ -79,9 +88,9 @@ class Node: #creation of bootstap node
 
 	
 
-	def valid_proof(message , prefix=DIFFICULTY):
+	def valid_proof(message , difficulty):
 		i = 0
-    	prefix = '1' * difficulty
+    	prefix = '0' * difficulty
     	while True:
 			nonce = str(i)
 			digest = dumb_hash(message + nonce)
