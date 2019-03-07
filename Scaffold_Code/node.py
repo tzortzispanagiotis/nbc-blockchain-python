@@ -5,7 +5,7 @@ class Node: #creation of bootstap node
 		#self.NBC=100
 		##set
 		self.current_block  #san transaction pool me transactions<=maximum
-		#self.chain
+		self.chain = []
 		#self.current_id_count
 		self.wallet = create_wallet()
 		self.transaction_pool
@@ -58,6 +58,7 @@ class Node: #creation of bootstap node
 		if (len(current_block) == max_transactions):
 			new_block = Block(previousHash , current_block)
 			mine_block(new_block)
+		
 		else:
 			current_block.append(transaction)
 
@@ -65,7 +66,7 @@ class Node: #creation of bootstap node
 
 	def mine_block( block ):
 		 last_block = self.chain[-1]
-		## message= kati to_dict 
+		 last_block = to_dict(last_block)
 		 nonce = self.valid_proof(message)
 		 block.add_nonce(nonce)
 		 self.broadcast_block()
