@@ -3,7 +3,7 @@ from collections import OrderedDict
 import binascii
 import hashlib
 import json
-import Crypto
+import crypto
 import Crypto.Random
 from Crypto.Hash import SHA
 from Crypto.PublicKey import RSA

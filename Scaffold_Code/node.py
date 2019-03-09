@@ -1,4 +1,4 @@
-from Scaffold_Code import block, wallet , config ,chain
+from Scaffold_Code import block, wallet , config ,chain , transaction
 
 class Node: #creation of bootstap node
 	def __init__(self):
@@ -9,6 +9,7 @@ class Node: #creation of bootstap node
 		#self.current_id_count
 		self.wallet = create_wallet()
 		self.transaction_pool
+		self.UTXO = []
 		#slef.ring[]   #here we store information for every node, as its id, its address (ip:port) its public key and its balance 
 
 
@@ -28,7 +29,14 @@ class Node: #creation of bootstap node
 		#bottstrap node informs all other nodes and gives the request node an id and 100 NBCs
 
 
-	def create_transaction(sender, receiver, signature):
+	def create_transaction(sender, receiver,amount ,  signature , wallet):
+		traninput = []
+		#inputs ola ta outputs pou exoun os receiver ton torino sender
+		for i in UTXO:
+			if (i.recepient==sender):
+				traninput.append(i)
+        new_transaction = Transaction(wallet , receiver , amount , traninput)
+		new_transaction.add_id_to_output()	    
 		#remember to broadcast it
 
 
@@ -36,7 +44,7 @@ class Node: #creation of bootstap node
 
 
 	def verify_signature(transaction):
-		tr = to_dict1(transaction , True)
+		tr = to_dict1(transaction , False)
 		pubkey= RSA.importKey(binascii.unhexlify(tra)
 	    verifier = PKCS1_v1_5.new(pubkey)
 		h = SHA.new(message.encode('utf8'))
