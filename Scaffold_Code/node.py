@@ -27,7 +27,7 @@ class Node: #creation of bootstap node
 	def register_node_to_ring():
 		#add this node to the ring, only the bootstrap node can add a node to the ring after checking his wallet and ip:port address
 		#bottstrap node informs all other nodes and gives the request node an id and 100 NBCs
-
+        return True 
 
 	def create_transaction(sender, receiver,amount ,  signature , wallet):
 		traninput = []
@@ -44,8 +44,8 @@ class Node: #creation of bootstap node
 
 
 	def verify_signature(transaction):
-		tr = to_dict1(transaction , False)
-		pubkey= RSA.importKey(binascii.unhexlify(tra)
+		tr = transaction.to_dict1(False)
+		pubkey= RSA.importKey(binascii.unhexlify(tr)
 	    verifier = PKCS1_v1_5.new(pubkey)
 		h = SHA.new(message.encode('utf8'))
 	    return verifier.verify(h, binascii.unhexlify(transaction.signature))
@@ -56,15 +56,18 @@ class Node: #creation of bootstap node
 		#when receiving a transaction, first validate with the signature
 		#second, check if UTXOs are enough to make the transaction
 		#if validation is OK, add transaction to current block
-		if not isinstance(transaction, GenesisTransaction): {
+		if (verify_signature(transaction)):
 
-		# Verify input transactions
-		for tx in transaction.inputs:
-        	if not validate_transaction(tx.transaction): 
-            	logging.error("Invalid parent transaction")
-            	return False
-		}
-		return True
+			if not isinstance(transaction, GenesisTransaction): {
+
+			# Verify input transactions
+			for tx in transaction.inputs:
+				if not validate_transaction(tx.transaction): 
+					logging.error("Invalid parent transaction")
+					return False
+			}
+			return True
+		return False
 
 	def add_transaction_to_block(current_block , transaction , previousHash): 
 		#if

@@ -3,7 +3,7 @@ from collections import OrderedDict
 import binascii
 import hashlib
 import json
-import crypto
+import Crypto
 import Crypto.Random
 from Crypto.Hash import SHA
 from Crypto.PublicKey import RSA
@@ -43,7 +43,7 @@ class TransactionOutput:
 
 class Transaction:
 
-    def __init__(self, wallet, recipient_address, value,UTXOS ,):
+    def __init__(self, wallet, recipient_address, value,UTXOS ):
 
         #set
 
@@ -63,7 +63,7 @@ class Transaction:
         #output gia ton reciever
         output1=TransactionOutput(self.receiver_address , self.amount)
         #afta pou perisepsan se afton pou esteile
-        output2=TransactionOutput(self.sender_address , self.wallet.get_balance())
+        output2=TransactionOutput(self.sender_address , self.wallet.get_balance()-self.amount)
         out.append(output1)
         out.append(output2)
         return out
@@ -86,11 +86,11 @@ class Transaction:
         
     def hash_transaction(self):
          return  hashlib.sha256(json.dumps(self.to_dict1(True)))
-
+    def get_receiver(self):
+         return  self.receiver_address
 
     def add_id_to_output(self):
         for out in self.transaction_outputs:
             out.fill_id(self.transaction_id)
 
-    #mallon na paei sto walltet
    
