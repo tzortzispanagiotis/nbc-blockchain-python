@@ -1,15 +1,15 @@
 from collections import OrderedDict
-
-import binascii
-import hashlib
-import json
 import Crypto
 import Crypto.Random
 from Crypto.Hash import SHA
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
-import requests
-from flask import Flask, jsonify, request, render_template
+#import requests
+#from flask import Flask, jsonify, request, render_template
+import binascii
+import hashlib
+import json
+
 
 class TransactionInput:
 #input points to output
@@ -39,6 +39,9 @@ class TransactionOutput:
 
         }
         return d
+             
+    def get_receiver(self):
+         return  self.recipient
 
 
 class Transaction:
@@ -74,7 +77,9 @@ class Transaction:
 
 
     def to_dict1(self,include_signature=True):
-        d = {
+        d = {"sender":self.sender_address , 
+            "receiver":self.receiver_address , 
+            "amount":self.amount , 
             "inputs": list(map(TransactionInput.to_dict, self.transaction_inputs)),
             "outputs": list(map(TransactionOutput.to_dict, self.transaction_outputs)),
         }
@@ -86,6 +91,7 @@ class Transaction:
         
     def hash_transaction(self):
          return  hashlib.sha256(json.dumps(self.to_dict1(True)))
+
     def get_receiver(self):
          return  self.receiver_address
 

@@ -41,11 +41,8 @@ class Wallet:
 
 
     #na to dw 
-	 def sign_transaction(message , sender_private_key):
-        """
-        Sign transaction with private key
-        """
-       private_key = RSA.importKey(binascii.unhexlify(self.sender_private_key))
-       signer = PKCS1_v1_5.new(private_key)
-       h = SHA.new(str(self.to_dict()).encode('utf8'))
-       return binascii.hexlify(signer.sign(h)).decode('ascii')
+	def sign_transaction(self , message , sender_private_key):
+			private_key = RSA.importKey(binascii.unhexlify(self._private_key))
+			signer = PKCS1_v1_5.new(private_key)
+			h = SHA.new(str(self.to_dict()).encode('utf8'))
+			return binascii.hexlify(signer.sign(h)).decode('ascii')

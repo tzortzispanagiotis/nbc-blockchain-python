@@ -26,24 +26,26 @@ class Node: #creation of bootstap node
 		return Wallet()
 
 	def register_node_to_ring():
+       		return True 
+
 		#add this node to the ring, only the bootstrap node can add a node to the ring after checking his wallet and ip:port address
 		#bottstrap node informs all other nodes and gives the request node an id and 100 NBCs
-        #return True 
 
 	def create_transaction(sender, receiver,amount ,  signature , wallet):
-		traninput = []
-		#inputs ola ta outputs pou exoun os receiver ton torino sender
-		for i in UTXO:
-			if (i.recepient==sender):
-				traninput.append(i)
-				UTXO.remove(i)
-        new_transaction = Transaction(wallet , receiver , amount , traninput)
-		new_transaction.add_id_to_output()	
-		return new_transaction    
+			traninput = []
+			#inputs ola ta outputs pou exoun os receiver ton torino sender
+			for i in UTXO:
+					if (i.recepient==sender):
+						traninput.append(i)
+						UTXO.remove(i)
+			new_transaction = Transaction(wallet , receiver , amount , traninput)
+			new_transaction.add_id_to_output()	
+			return new_transaction    
 		#remember to broadcast it
 
 
 	def broadcast_transaction():
+		return 1
 
 
 	def verify_signature(transaction):
@@ -52,7 +54,8 @@ class Node: #creation of bootstap node
 		pubkey= RSA.importKey(binascii.unhexlify(tr)
 	    verifier = PKCS1_v1_5.new(pubkey)
 		h = SHA.new(message.encode('utf8'))
-	    return verifier.verify(h, binascii.unhexlify(transaction.signature))
+	    v = verifier.verify(h, binascii.unhexlify(transaction.signature))
+		return v 
 
 
 
@@ -94,8 +97,8 @@ class Node: #creation of bootstap node
 
 	def mine_block( block , self  ):
 		 last_block = self.chain[-1]
-		 message = to_dict(last_block)
-		 nonce = self.valid_proof(message)
+		 message = last_block.to_dict()
+		 nonce = self.search_proof(message)
 		 block.add_nonce(nonce)
 		 self.broadcast_block()
 		 chain.add_block_to_mychain(block)
@@ -107,7 +110,7 @@ class Node: #creation of bootstap node
 
 	
 
-	def valid_proof(message , difficulty):
+	def search_proof(message , difficulty):
 		i = 0
     	prefix = '0' * difficulty
     	while True:
@@ -118,15 +121,37 @@ class Node: #creation of bootstap node
 			i += 1
 
 
-
+	  def valid_proof(self , block):
+        d = OrderedDict({'transactions': block['listOfTransactions],
+			'previousHash':  block['_previousHash'],
+			#'nonce': self.nonce , 
+			'number': block['blocknumber']
+		})
+		nonce = block['nonce']
+		digest = dumb_hash(message + nonce)			
+       if ( digest.startswith('0' * difficulty)):
+		   return True
+	   else:
+		return False
+		
 	#concencus functions
+
     def validate_block(self ,block):
 		#check proof of work 
+		flag1 = valid_proof(block)
+		if (flag1):
 		#check previous hash
-		my_last_block=self.chain[-1]
-		 if (block['previous_hash'] != my_last_block.gethash()):
-			 resolve_conflicts(self)
-		 else return True
+			my_last_block=self.chain[-1]
+			if (block['previous_hash'] != my_last_block.gethash()):
+				flag = resolve_conflicts(self)
+				if !(flag): return False
+				return True
+			else: 
+				return True
+		return False
+			
+
+		 
 
 	def valid_chain(self, chain):
 		#check for the longer chain accroose all nodes
