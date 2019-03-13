@@ -1,5 +1,5 @@
 
-from Scaffold_Code import block.py , wallet.py , config.py 
+from Scaffold_Code import block, wallet, config
 
 
 

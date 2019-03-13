@@ -75,12 +75,12 @@ class Transaction:
         return self.transaction_id
 
     def to_dict1(self, include_signature = True):
-        d = {"sender": self.sender_address,
+        d = OrderedDict({"sender": self.sender_address,
              "receiver": self.receiver_address,
              "amount": self.amount,
              "inputs": list(map(TransactionInput.to_dict, self.transaction_inputs)),
              "outputs": list(map(TransactionOutput.to_dict, self.transaction_outputs)),
-        }
+        })
         #to message pou upografw kai meta elegxw an antistoixei stin upografi apoteleitai mono apo ta 
         #inputs kai ta outputs
         if include_signature:
