@@ -24,12 +24,12 @@ class TransactionInput:
 
 class TransactionOutput:
     def __init__(self, receiver_address, amount):
-        self.recipient =receiver_address
+        self.recipient = receiver_address
         self.amount = amount
         self.transactionId = None
 
-    def fill_id(self , tid):
-        self.transactionId=tid
+    def fill_id(self, tid):
+        self.transactionId = tid
 
     def to_dict(self):
         d = {
@@ -72,16 +72,14 @@ class Transaction:
         return out
 
     def getid(self):
-        return self.transaction_id 
+        return self.transaction_id
 
-
-
-    def to_dict1(self,include_signature=True):
-        d = {"sender":self.sender_address , 
-            "receiver":self.receiver_address , 
-            "amount":self.amount , 
-            "inputs": list(map(TransactionInput.to_dict, self.transaction_inputs)),
-            "outputs": list(map(TransactionOutput.to_dict, self.transaction_outputs)),
+    def to_dict1(self, include_signature = True):
+        d = {"sender": self.sender_address,
+             "receiver": self.receiver_address,
+             "amount": self.amount,
+             "inputs": list(map(TransactionInput.to_dict, self.transaction_inputs)),
+             "outputs": list(map(TransactionOutput.to_dict, self.transaction_outputs)),
         }
         #to message pou upografw kai meta elegxw an antistoixei stin upografi apoteleitai mono apo ta 
         #inputs kai ta outputs
@@ -90,13 +88,11 @@ class Transaction:
         return d
         
     def hash_transaction(self):
-         return  hashlib.sha256(json.dumps(self.to_dict1(True)))
+        return hashlib.sha256(json.dumps(self.to_dict1(True)))
 
     def get_receiver(self):
-         return  self.receiver_address
+        return self.receiver_address
 
     def add_id_to_output(self):
         for out in self.transaction_outputs:
             out.fill_id(self.transaction_id)
-
-   
