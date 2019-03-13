@@ -37,6 +37,26 @@ def get_transactions():
 
 # run it once fore every node
 
+@app.route('nodes/resolve', methods=['GET'])
+def resolving_them():
+    resolved = blockchain.resolve_conflicts()
+
+    if resolved:
+        response = {
+            'message': 'resolved chain',
+            'new_chain' = blockchain.chain
+        }
+    else:
+        response = {
+            'message': 'as it was',
+            'new_chain' = blockchain.chain
+        }
+    return jsonify(response), 200
+
+
+
+
+
 if __name__ == '__main__':
     from argparse import ArgumentParser
 
