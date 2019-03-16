@@ -1,5 +1,5 @@
 from Scaffold_Code import block, wallet , config ,chain , transaction
-
+import requests, json
 class Node: #creation of bootstap node
 	def __init__(self):
 		#self.NBC=100
@@ -11,22 +11,25 @@ class Node: #creation of bootstap node
 		self.transaction_pool = []
 		#utxo==transaction_output
 		self.UTXO = []
-		#slef.ring[]   #here we store information for every node, as its id, its address (ip:port) its public key and its balance 
-
-
-
+		self.ring = []   #here we store information for every node, as its id, its address (ip:port) its public key and its balance 
 
 	#def create_new_block(previousHash): #an einai to proto 
-				
-		
-
 		
 	def create_wallet():
 		##create a wallet for this node, with a public key and a private key
 		return Wallet()
 
-	def register_node_to_ring():
-       		return True 
+	def register_node_to_ring(self, newNode): #only bootstrap can do that
+		temp = {
+				'wallet' : newNode['pkey'],
+				'ip'		: newNode['ip'],
+				'port'   : newNode['port']
+			}
+		self.ring.append(temp)
+		if len(self.ring) == 5:
+			body = json.dumps(self.ring)
+			for i in self.ring:
+				r = requests.post(i.ip+':'+i.port+'/receivewallets', data = body )
 
 		#add this node to the ring, only the bootstrap node can add a node to the ring after checking his wallet and ip:port address
 		#bottstrap node informs all other nodes and gives the request node an id and 100 NBCs

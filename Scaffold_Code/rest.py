@@ -2,27 +2,34 @@ import requests
 from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
 
-
-import block
-import node
-import blockchain
-import wallet
-import transaction
-import wallet
-
+from Scaffold_Code import block, chain, wallet, transaction, node
 
 ### JUST A BASIC EXAMPLE OF A REST API WITH FLASK
 
 
-
 app = Flask(__name__)
 CORS(app)
-blockchain = Blockchain()
+node = Node()
 
+#blockchain = Blockchain()
 
 #.......................................................................................
 
 
+#bootstrap ONLY:
+@app.route('/addnode', methods=['POST'])
+def add_node():
+    newNode = {}
+    newNode['pkey'] = request.form.get('pkey')
+    newNode['ip'] = request.form.get('ip')
+    newNode['port'] = request.form.get('port')
+    node.register_node_to_ring(newNode)
+    return jsonify(status=successful)
+
+
+@app.route('/receivewallets', methods = ['POST'])
+def receive_wallets():
+    
 
 # get all transactions in the blockchain
 

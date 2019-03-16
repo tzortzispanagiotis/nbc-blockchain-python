@@ -1,10 +1,12 @@
 import collections
 
-import blockchain
+from Scaffold_Code import chain
+
 import hashlib
 import json
 import datetime
-import coll
+# import coll
+
 class Block:
 	def __init__(self, previousHash, currentbl):
 		##set
@@ -19,14 +21,14 @@ class Block:
 	def getblocknum(self):
 		return self.blocknumber
 
-	def to_dict(self):
-				d = OrderedDict({
-					'transactions': self.listOfTransactions,
-					'previousHash': self._previousHash,
-					#'nonce': self.nonce , 
-					'number':self.blocknumber
-				})				
-				return d	
+	def to_dict(self):				
+		return {
+			'transactions': self.listOfTransactions,
+			'previousHash': self._previousHash,
+			#'nonce': self.nonce , 
+			'number':self.blocknumber
+		}
+
 	def add_nonce(self,n):
 		self.nonce = n
 
