@@ -12,7 +12,7 @@ class Node: #creation of bootstap node
 		#utxo==transaction_output
 		self.UTXO = []
 		#slef.ring[]   #here we store information for every node, as its id, its address (ip:port) its public key and its balance 
-
+		self.block_pool = []
 
 
 
@@ -138,7 +138,7 @@ class Node: #creation of bootstap node
 		if (flag1):
 		#check previous hash
 			my_last_block=self.chain[-1]
-			if (block['previous_hash'] != my_last_block.gethash()):
+			if (block['previousHash'] != my_last_block.gethash()):
 				flag = resolve_conflicts(self)
 				if !(flag): return False
 				return True
@@ -151,26 +151,35 @@ class Node: #creation of bootstap node
 	def valid_chain(self, chain):
 		###check for the longer chain accroose all nodes
 
+		#new nodes check for blockchain validity for all blocks except genesis
+		#do we need to implement it??
+
+
+
 		#elegxw an to chain einai valid
-		last_block = chain[0]
-		l = len(chain)
-		for j in range(l):
-			temp_block = chain(j)
-			valid_block = validate_block(temp_block)
-			if valid_block == False:
-				return False
-			last_block = temp_block
+		#last_block = chain[0]
+		#l = len(chain)
+		#for j in range(l):
+		#	temp_block = chain(j)
+		#	valid_block = validate_block(temp_block)
+		#	if valid_block == False:
+		#		return False
+		#	last_block = temp_block
 		return True
 
 
 
-	def resolve_conflicts(self, other_chains):
+	def resolve_conflicts(self, received_block, current_block):
 		#resolve correct chain
 		changed = False
-		max_chain_len = len(self.chain)
-		#analoga me ti format tha pairnw tis alles alusides?
-		for c in other_chains:
-			if len(c) > max_chain_len:
-				self.chain = c
-				changed = True
+
+		if received_block['previousHash'] == current_block['previousHash']:
+			self.block_pool.append(received_block)
+		else:
+			for b in self.block_pool:
+				if b['previousHash'] == current_block['previousHash'] and received_block['previousHash'] == block.getHash(b):
+					self.chain[-1] = b
+					self.chain.append(received_block)
+					changed = True
+
 		return changed
