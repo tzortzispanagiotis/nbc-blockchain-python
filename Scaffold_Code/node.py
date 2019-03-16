@@ -23,7 +23,7 @@ class Node: #creation of bootstap node
 		
 	def create_wallet():
 		##create a wallet for this node, with a public key and a private key
-		return Wallet()
+		return wallet.Wallet()
 
 	def register_node_to_ring():
 		return True
@@ -38,7 +38,7 @@ class Node: #creation of bootstap node
 					if (i.recepient==sender):
 						traninput.append(i)
 						self.UTXO.remove(i)
-			new_transaction = Transaction(wallet , receiver , amount , traninput)
+			new_transaction = transaction.Transaction(wallet , receiver , amount , traninput)
 			new_transaction.add_id_to_output()	
 			return new_transaction    
 		#remember to broadcast it
@@ -61,7 +61,7 @@ class Node: #creation of bootstap node
 
 	def validate_transaction(self, transaction):
 		#sos ti object einai to transaction tha einai logika se morfi dict?
-		if verify_signature(transaction):
+		if self.verify_signature(transaction):
 			traninput=[]
 			sum1=0
 			for i in self.UTXO:
@@ -69,7 +69,7 @@ class Node: #creation of bootstap node
 					traninput.append(i)
 					sum1=sum1+i.amount
 			if sum1>=transaction.amount
-			#eparki xrimata gia tin metafora
+				#eparki xrimata gia tin metafora
 				for t in traninput:
 					self.UTXO.remove(t)
 				#now create transaction outputs and add them at the utxo list
@@ -79,14 +79,14 @@ class Node: #creation of bootstap node
 				self.UTXO.append(out2)
 		
 
-	def add_transaction_to_block(current_block , transaction , previousHash): 
+	def add_transaction_to_block(self, current_block , transaction , previousHash):
 		#if
 		#if enough transactions  mine
-		if validate_transaction(transaction):
-			if (len(current_block) == max_transactions):
+		if self.validate_transaction(transaction):
+			if (len(current_block) == config.max_transactions):
 				new_block = Block(previousHash , current_block)
 				new_block.myHash()
-				mine_block(new_block)
+				self.mine_block(new_block)
 			else:
 				current_block.append(transaction)
 
@@ -119,7 +119,7 @@ class Node: #creation of bootstap node
 
 
 	def valid_proof(self, block):
-		d = {'transactions': block['listOfTransactions],
+		d = {'transactions': block['listOfTransactions'],
 			'previousHash':  block['previousHash'],
 			 #'nonce': self.nonce ,
 			'number': block['number']
