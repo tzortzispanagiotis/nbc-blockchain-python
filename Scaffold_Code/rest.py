@@ -54,7 +54,7 @@ if __name__ == '__main__':
     parser.add_argument('-bport', help='bootstrap port, -1 if bootstrap')
     args = parser.parse_args()
     port = args.port
-    node = Node(args.port, args.ip, args.bip, args. bport)
+    # node = Node(args.port, args.ip, args.bip, args. bport)
     if node.bootstrapip != -1:
         temp = {
 				'pkey' : node.wallet.address,

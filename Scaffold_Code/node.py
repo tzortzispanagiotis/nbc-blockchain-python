@@ -1,10 +1,11 @@
 from Scaffold_Code import block, wallet , config ,chain , transaction
 import requests, json
 class Node: #creation of bootstap node
-	def __init__(self, ip, port, bootstrapip):
+	def __init__(self, ip, port, bootstrapip, bootstrapport):
 		#self.NBC=100
 		##set
 		self.bootstrapip = bootstrapip
+		self.bootstrapport = bootstrapport
 		self.current_block  = [] #san transaction pool me transactions<=maximum
 		self.chain = []
 		#self.current_id_count
