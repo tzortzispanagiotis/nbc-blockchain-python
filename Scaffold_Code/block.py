@@ -1,10 +1,8 @@
 import collections
-
-import blockchain
+from collections import OrderedDict
 import hashlib
 import json
 import datetime
-import coll
 class Block:
 	def __init__(self, previousHash, currentbl):
 		##set

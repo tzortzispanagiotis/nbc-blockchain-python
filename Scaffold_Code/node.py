@@ -49,27 +49,23 @@ class Node: #creation of bootstap node
 		return 1
 
 
-	def verify_signature(transaction):
-		tr = transaction.to_dict1(False)
-		#analoga se ti morfi tha to pairnw , ligika tha einai idi se json
-		pubkey= RSA.importKey(binascii.unhexlify(tr)
-	    verifier = PKCS1_v1_5.new(pubkey)
-		h = SHA.new(message.encode('utf8'))
-	    v = verifier.verify(h, binascii.unhexlify(transaction.signature))
-		return v 
-
-
-
 	def validate_transaction(self, transaction):
+		tr = {"sender": transaction.sender,
+             "receiver": transaction.receiver,
+             "amount": transaction.amount,
+             "inputs": transaction.inputs,
+             "outputs": transaction.outputs ,
+
+		}
 		#sos ti object einai to transaction tha einai logika se morfi dict?
-		if (verify_signature(transaction)):
+		if (verify_signature(transaction.adr , tr , transaction.signature)):
 			traninput=[]
 			sum1=0
 			for i in self.UTXO:
 				if (i.recepient==transaction.sender_address):
 					traninput.append(i)
 					sum1=sum1+i.amount
-			if (sum1>=transaction.amount)
+			if (sum1>=transaction.amount):
 			#eparki xrimata gia tin metafora
 				for t in traninput:
 					self.UTXO.remove(t)
@@ -88,8 +84,7 @@ class Node: #creation of bootstap node
 				new_block = Block(previousHash , current_block)
 				new_block.myHash()
 				mine_block(new_block)
-			
-		    else:
+			else:
 				current_block.append(transaction)
 
 
@@ -104,15 +99,15 @@ class Node: #creation of bootstap node
 
 
 
-	def broadcast_block():
+	#def broadcast_block():
 
 
 	
 
 	def search_proof(message , difficulty):
 		i = 0
-    	prefix = '0' * difficulty
-    	while True:
+		prefix = '0' * difficulty
+		while True:
 			nonce = str(i)
 			digest = dumb_hash(message + nonce)
 			if digest.startswith(prefix):
@@ -128,14 +123,14 @@ class Node: #creation of bootstap node
 						})
 		nonce = block['nonce']
 		digest = dumb_hash(message + nonce)			
-       if ( digest.startswith('0' * difficulty)):
-		   return True
-	   else:
-		return False
+		if ( digest.startswith('0' * difficulty)):
+			return True
+		else:
+			return False
 		
 	#concencus functions
 
-    def validate_block(self ,block):
+	def validate_block(self ,block):
 		#check proof of work 
 		flag1 = valid_proof(block)
 		if (flag1):
@@ -143,7 +138,8 @@ class Node: #creation of bootstap node
 			my_last_block=self.chain[-1]
 			if (block['previous_hash'] != my_last_block.gethash()):
 				flag = resolve_conflicts(self)
-				if !(flag): return False
+				if (flag==False): 
+					return False
 				return True
 			else: 
 				return True
@@ -159,21 +155,22 @@ class Node: #creation of bootstap node
 
 
 
-def resolve_conflicts(self, received_block, current_block):
+	def resolve_conflicts(self):
+		return True
 	# resolve correct chain
-	changed = False
+	#changed = False
 
-	if received_block['previousHash'] == current_block['previousHash']:
-		self.block_pool.append(received_block)
-	else:
-		for b in self.block_pool:
-			if b['previousHash'] == current_block['previousHash'] and received_block[
-				'previousHash'] == block.getHash(b):
-				self.chain[-1] = b
-				self.chain.append(received_block)
-				changed = True
+	#if received_block['previousHash'] == current_block['previousHash']:
+		#self.block_pool.append(received_block)
+	#else:
+		#for b in self.block_pool:
+		#	if b['previousHash'] == current_block['previousHash'] and received_block[
+			#	'previousHash'] == block.getHash(b):
+			#	self.chain[-1] = b
+			#	self.chain.append(received_block)
+			#	changed = True
 
-	return changed
+	#return changed
 
 
 

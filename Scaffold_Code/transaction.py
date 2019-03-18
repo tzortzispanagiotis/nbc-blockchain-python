@@ -50,23 +50,23 @@ class Transaction:
 
         #set
 
-        self.wallet=wallet
+        #self.wallet=wallet
         self.sender_address = wallet.getAddress() #To public key του wallet από το οποίο προέρχονται τα χρήματα
         self.receiver_address = recipient_address #To public key του wallet στο οποίο θα καταλήξουν τα χρήματα
         self.amount = value #το ποσό που θα μεταφερθεί
         self.transaction_inputs= UTXOS
-        self.transaction_outputs=self.createOutputs()#λίστα από Transaction Output
+        self.transaction_outputs=self.createOutputs(wallet.get_balance())#λίστα από Transaction Output
         self.signature =wallet.sign_transaction(self.to_dict1(False))
         self.transaction_id =self.hash_transaction() #το hash του transaction
 
 
 
-    def createOutputs(self):
+    def createOutputs(self , balance):
         out=[]
         #output gia ton reciever
         output1=TransactionOutput(self.receiver_address , self.amount)
         #afta pou perisepsan se afton pou esteile
-        output2=TransactionOutput(self.sender_address , self.wallet.get_balance()-self.amount)
+        output2=TransactionOutput(self.sender_address , balance-self.amount)
         out.append(output1)
         out.append(output2)
         return out
