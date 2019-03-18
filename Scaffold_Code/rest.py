@@ -57,7 +57,7 @@ if __name__ == '__main__':
     node = Node(args.port, args.ip, args.bip, args. bport)
     if node.bootstrapip != -1:
         temp = {
-				'wallet' : node.wallet.address,
+				'pkey' : node.wallet.address,
 				'ip'		: node.ring[0]['ip'],
 				'port'   : node.ring[0]['port']
 			}
