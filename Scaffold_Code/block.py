@@ -1,4 +1,4 @@
-import collections
+from import collections
 
 import blockchain
 import hashlib
@@ -14,32 +14,38 @@ class Block:
 		self.listOfTransactions = []
 		self.blocknumber=currentbl.getblocknum()+1
 		self.nonce = ""
-		self.currenthash = None
+		#self.currenthash = None
 
 	def getblocknum(self):
 		return self.blocknumber
 
-	def to_dict(self):
-				d = OrderedDict({
-					'transactions': self.listOfTransactions,
-					'previousHash': self._previousHash,
-					#'nonce': self.nonce , 
-					'number':self.blocknumber
-				})				
-				return d	
+	def to_dict(self, include_nonce = True):
+		if include_nonce == False:
+			d = OrderedDict({
+				'transactions': self.listOfTransactions,
+				'previousHash': self._previousHash,
+				'number': self.blocknumber
+			})
+		else:
+			d = OrderedDict({
+				'transactions': self.listOfTransactions,
+				'previousHash': self._previousHash,
+				'nonce': self.nonce,
+				'number': self.blocknumber
+			})
+		return d
+
 	def add_nonce(self,n):
 		self.nonce = n
 
 	def myHash(self):
-			h=hashlib.sha256(json.dumps(self.to_dict()))
-			self.currenthash = h
-			return h
-
-		#calculate self.hash
-	def getHash(self):
-		return self.currenthash
-
+        
+		return hashlib.sha256(json.dumps(self.to_dict(include_nonce=false)))
+		#allios tha exw an thelw na ta kanw prin json.dumps
+		# block_string = json.dumps(block, sort_keys=True).encode()
+        
+        # return hashlib.sha256(block_string).hexdigest()
 
 
-	#def add_transaction(self , transaction):
-		#add a transaction to the block
+	
+

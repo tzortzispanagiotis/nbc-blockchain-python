@@ -80,13 +80,15 @@ class Node: #creation of bootstap node
 				self.UTXO.append(out2)
 		
 
-	def add_transaction_to_block(current_block , transaction , previousHash): 
+	def add_transaction_to_block(current_block , transaction ): 
 		#if
 		#if enough transactions  mine
 		if self.validate_transaction(transaction):
 			if (len(current_block) == transaction.max_transactions):
+				previousblock = self.chain[-1]
+				previousnonce = previousblock['nonce']
+				previousHash = sha256(json.dumps(previousblock.to_dict(include_nonce=false)+previousblock['nonce']):
 				new_block = Block(previousHash , current_block)
-				new_block.myHash()
 				mine_block(new_block)
 			
 		    else:
@@ -95,8 +97,8 @@ class Node: #creation of bootstap node
 
 
 	def mine_block( block , self  ):
-		 last_block = self.chain[-1]
-		 message = last_block.to_dict()
+		 
+		 message = block.to_dict()
 		 nonce = self.search_proof(message)
 		 block.add_nonce(nonce)
 		 self.broadcast_block()
@@ -114,7 +116,7 @@ class Node: #creation of bootstap node
     	prefix = '0' * difficulty
     	while True:
 			nonce = str(i)
-			digest = dumb_hash(message + nonce)
+			digest = sha256(json.dumps((message + nonce))
 			if digest.startswith(prefix):
 				return nonce
 			i += 1
@@ -127,7 +129,7 @@ class Node: #creation of bootstap node
 						 'number': block['blocknumber']
 						})
 		nonce = block['nonce']
-		digest = dumb_hash(message + nonce)			
+		digest = sha256(json.dumps((message + nonce))
        if ( digest.startswith('0' * difficulty)):
 		   return True
 	   else:
@@ -153,9 +155,27 @@ class Node: #creation of bootstap node
 		 
 
 	def valid_chain(self, chain):
-		# check for the longer chain accroose all nodes
+		# check if the chain gven is valid
+		current_index=1
+		last_block=chain[0]
+		while current_index < len(chain):
+            block = chain[current_index]
+            
+            # Check that the hash of the block is correct
+            if block['previous_hash'] != sha256(json.dumps(last_block.to_dict(include_nonce=false)+last_block['nonce']):
+                return False
 
-		# mallon de mas xreiazetai
+            # Check that the Proof of Work is correct
+            #Delete the reward transaction
+            
+            if not self.valid_proof(block):
+                return False
+
+            last_block = block
+            current_index += 1
+
+        return True
+		
 
 
 
