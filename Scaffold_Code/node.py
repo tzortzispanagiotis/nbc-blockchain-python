@@ -93,10 +93,8 @@ class Node: #creation of bootstap node
 		message = last_block.to_dict(include_nonce=False)
 		nonce = self.search_proof(message, config.difficulty)
 		_block.add_nonce(nonce)
-		self.broadcast_block()
 		self.chain.append(_block)
-
-
+		self.broadcast_block()
 
 	def broadcast_block():
 		return True
@@ -119,7 +117,7 @@ class Node: #creation of bootstap node
 						 'number': block['blocknumber']
 						})
 		nonce = block['nonce']
-		digest = dumb_hash(message + nonce)			
+		digest = dumb_hash(message + nonce)
 		if ( digest.startswith('0' * difficulty)):
 			return True
 		else:
