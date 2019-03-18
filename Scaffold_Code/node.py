@@ -1,9 +1,10 @@
 from Scaffold_Code import block, wallet , config ,chain , transaction
 import requests, json
 class Node: #creation of bootstap node
-	def __init__(self):
+	def __init__(self, ip, port, bootstrapip):
 		#self.NBC=100
 		##set
+		self.bootstrapip = bootstrapip
 		self.current_block  = [] #san transaction pool me transactions<=maximum
 		self.chain = []
 		#self.current_id_count
@@ -11,8 +12,12 @@ class Node: #creation of bootstap node
 		self.transaction_pool = []
 		#utxo==transaction_output
 		self.UTXO = []
-		self.ring = []   #here we store information for every node, as its id, its address (ip:port) its public key and its balance 
-
+		self.ring = [{
+			'pkey' : self.wallet.address,
+			'ip'   : ip,
+			'port' : port
+		}]  
+		 #here we store information for every node, as its id, its address (ip:port) its public key and its balance 
 	#def create_new_block(previousHash): #an einai to proto 
 		
 	def create_wallet():
