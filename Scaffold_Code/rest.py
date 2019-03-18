@@ -9,7 +9,7 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
-
+node = None
 
 #blockchain = Blockchain()
 
@@ -29,6 +29,7 @@ def add_node():
 
 @app.route('/receivewallets', methods = ['POST'])
 def receive_wallets():
+
     return True
     
 
@@ -57,10 +58,10 @@ if __name__ == '__main__':
     # node = Node(args.port, args.ip, args.bip, args. bport)
     if node.bootstrapip != -1:
         temp = {
-				'pkey' : node.wallet.address,
-				'ip'		: node.ring[0]['ip'],
-				'port'   : node.ring[0]['port']
-			}
+                'pkey': node.wallet.address,
+                'ip': node.ring[0]['ip'],
+                'port': node.ring[0]['port']
+        }
         body = json.dumps(temp)
-        r = requests.post(node.bootstrapip+':'+node.bootstrapport+'/addnode', data = body )
+        r = requests.post(node.bootstrapip+':'+node.bootstrapport+'/addnode', data=body)
     app.run(host='127.0.0.1', port=port)
