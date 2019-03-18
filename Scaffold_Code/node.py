@@ -1,6 +1,8 @@
-from Scaffold_Code import block, wallet , config, transaction
+import block, wallet , config, transaction
 
 from collections import OrderedDict
+
+import hashlib
 
 class Node: #creation of bootstap node
 	def __init__(self):
@@ -10,6 +12,7 @@ class Node: #creation of bootstap node
 		self.chain = []
 		#self.current_id_count
 		self.wallet = self.create_wallet()
+
 		self.transaction_pool = []
 		#utxo==transaction_output
 		self.UTXO = []
@@ -23,12 +26,12 @@ class Node: #creation of bootstap node
 		
 
 		
-	def create_wallet():
+	def create_wallet(self):
 		##create a wallet for this node, with a public key and a private key
 		return wallet.Wallet()
 
-	def register_node_to_ring():
-       		return True 
+	# def register_node_to_ring():
+    #    		return True
 
 		#add this node to the ring, only the bootstrap node can add a node to the ring after checking his wallet and ip:port address
 		#bottstrap node informs all other nodes and gives the request node an id and 100 NBCs
@@ -40,7 +43,7 @@ class Node: #creation of bootstap node
 					if (i.recepient==sender):
 						traninput.append(i)
 						self.UTXO.remove(i)
-			new_transaction = Transaction(wallet , receiver , amount , traninput)
+			new_transaction = transaction.Transaction(wallet , receiver , amount , traninput)
 			new_transaction.add_id_to_output()	
 			return new_transaction    
 		#remember to broadcast it
@@ -50,16 +53,15 @@ class Node: #creation of bootstap node
 		return 1
 
 
-	def validate_transaction(self, transaction):
-		tr = {"sender": transaction.sender,
-             "receiver": transaction.receiver,
-             "amount": transaction.amount,
-             "inputs": transaction.inputs,
-             "outputs": transaction.outputs ,
-
+	def validate_transaction(self, _transaction):
+		tr = {"sender": _transaction.sender,
+             "receiver": _transaction.receiver,
+             "amount": _transaction.amount,
+             "inputs": _transaction.inputs,
+             "outputs": _transaction.outputs ,
 		}
 		#sos ti object einai to transaction tha einai logika se morfi dict?
-		if (verify_signature(transaction.adr , tr , transaction.signature)):
+		if (wallet.verify_signature(tr["sender"] , tr , transaction.signature)):
 			traninput=[]
 			sum1=0
 			for i in self.UTXO:
@@ -77,35 +79,29 @@ class Node: #creation of bootstap node
 				self.UTXO.append(out2)
 		
 
-	def add_transaction_to_block(current_block , transaction , previousHash): 
-		#if
-		#if enough transactions  mine
-		if self.validate_transaction(transaction):
-			if (len(current_block) == transaction.max_transactions):
-				new_block = Block(previousHash , current_block)
-				new_block.myHash()
-				mine_block(new_block)
-			else:
-				current_block.append(transaction)
+	def add_transaction_to_block(self, _transaction , previousHash):
+		if self.validate_transaction(_transaction):
+			self.current_block.append(_transaction)
+			if len(self.current_block) == config.max_transactions:
+				new_block = block.Block(previousHash, self.current_block)
+				# new_block.myHash()
+				self.mine_block(new_block)
+
+
+	def mine_block( self, _block):
+		last_block = self.chain[-1]
+		message = last_block.to_dict(include_nonce=False)
+		nonce = self.search_proof(message, config.difficulty)
+		_block.add_nonce(nonce)
+		self.broadcast_block()
+		self.chain.append(_block)
 
 
 
-	def mine_block( block , self  ):
-		 last_block = self.chain[-1]
-		 message = last_block.to_dict()
-		 nonce = self.search_proof(message)
-		 block.add_nonce(nonce)
-		 self.broadcast_block()
-		 chain.add_block_to_mychain(block)
+	def broadcast_block():
+		return True
 
-
-
-	#def broadcast_block():
-
-
-	
-
-	def search_proof(message , difficulty):
+	def search_proof(self, message , difficulty):
 		i = 0
 		prefix = '0' * difficulty
 		while True:

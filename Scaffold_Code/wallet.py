@@ -1,5 +1,5 @@
 import binascii
-from Scaffold_Code import config , transaction
+import config , transaction
 
 import Crypto
 import Crypto.Random
