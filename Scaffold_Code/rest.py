@@ -29,7 +29,7 @@ def add_node():
 
 @app.route('/receivewallets', methods = ['POST'])
 def receive_wallets():
-
+    print (request.form)
     return True
     
 
