@@ -1,4 +1,5 @@
-from Scaffold_Code import block, wallet , config ,chain , transaction
+from Scaffold_Code import block, wallet , config, transaction
+
 from collections import OrderedDict
 
 class Node: #creation of bootstap node

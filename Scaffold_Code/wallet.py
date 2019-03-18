@@ -43,8 +43,7 @@ class Wallet:
 
 
 def verify_signature(wallet_address, message, signature):
-
-    pubkey = RSA.importKey(binascii.unhexlify(wallet_address))
-    verifier = PKCS1_v1_5.new(pubkey)
-    h = SHA.new(message.encode('utf8'))
-    return verifier.verify(h, binascii.unhexlify(signature))
+	pubkey = RSA.importKey(binascii.unhexlify(wallet_address))
+	verifier = PKCS1_v1_5.new(pubkey)
+	h = SHA.new(message.encode('utf8'))
+	return verifier.verify(h, binascii.unhexlify(signature))
