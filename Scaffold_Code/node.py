@@ -80,7 +80,7 @@ class Node: #creation of bootstap node
 		#if
 		#if enough transactions  mine
 		if self.validate_transaction(transaction):
-			if (len(current_block) == transaction.max_transactions):
+			if (len(current_block) == config.max_transactions):
 				new_block = Block(previousHash , current_block)
 				new_block.myHash()
 				mine_block(new_block)
@@ -95,6 +95,7 @@ class Node: #creation of bootstap node
 		 nonce = self.search_proof(message)
 		 block.add_nonce(nonce)
 		 self.broadcast_block()
+
 		 chain.add_block_to_mychain(block)
 
 
@@ -142,6 +143,12 @@ class Node: #creation of bootstap node
 					return False
 				return True
 			else: 
+				transactions=block['transactions']
+				for t in transactions:
+					for mytrans in self.current_block:
+						if (t.transaction_id ==mytrans.transaction_id):
+							self.current_block.remove(mytrans) 
+				chain.append(block)
 				return True
 		return False
 			
