@@ -48,6 +48,20 @@ class Node: #creation of bootstap node
 			body = json.dumps(self.ring)
 			for i in self.ring:
 				r = requests.post('http://'+i['ip']+':'+i['port']+'/receivewallets', data = body )
+			self.create_genesis_transactions()
+
+	def create_genesis_block(self, genesis_transactions):
+		genblock = GenesisBlock(genesis_transactions)
+		body = json.dumps(genblock)
+			for i in self.ring:
+				r = requests.post('http://'+i['ip']+':'+i['port']+'/receivewallets', data = body )
+
+	def create_genesis_transactions(self):
+		genesis_transactions = []
+		for i in self.ring:
+			new_trans = transaction.GenesisTransaction(i['pkey'], 100)
+			genesis_transactions.append(new_trans)
+		self.create_genesis_block(genesis_transactions)
 
 	def create_transaction(self, sender, receiver,amount ,  signature , wallet):
 		traninput = []

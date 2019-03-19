@@ -43,12 +43,15 @@ class TransactionOutput:
     def get_receiver(self):
          return  self.recipient
 
+class GenesisTrasnaction:
+    def __init__(self, receiver, amount):
+        self.receiver_address = receiver
+        self.amount = amount
 
 class Transaction:
-
     def __init__(self, wallet, recipient_address, value, UTXOS):
         #self.wallet=wallet
-        self.sender_address = wallet.addrss() #To public key του wallet από το οποίο προέρχονται τα χρήματα
+        self.sender_address = wallet.address() #To public key του wallet από το οποίο προέρχονται τα χρήματα
         self.receiver_address = recipient_address #To public key του wallet στο οποίο θα καταλήξουν τα χρήματα
         self.amount = value #το ποσό που θα μεταφερθεί
         self.transaction_inputs = UTXOS

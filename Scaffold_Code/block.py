@@ -3,11 +3,33 @@ import hashlib
 import json
 import datetime
 
+class GenesisBlock:
+	def _init_ (self, genesis_tr):
+		self._previousHash = 0
+		self._timestamp = datetime.datetime.now()
+		self.listOfTransactions = genesis_tr
+		self.blocknumber = 0
+		self.nonce = ""
 
+	def to_dict(self, include_nonce = True):
+		if include_nonce == False:
+			d = OrderedDict({
+				'transactions': self.listOfTransactions,
+				'previousHash': self._previousHash,
+				'number': self.blocknumber
+			})
+		else:
+			d = OrderedDict({
+				'transactions': self.listOfTransactions,
+				'previousHash': self._previousHash,
+				'nonce': self.nonce,
+				'number': self.blocknumber
+			})
+		return d
+		
 class Block:
 	def __init__(self, previousHash, currentbl):
 		##set
-
 		self._previousHash = previousHash
 		self._timestamp = datetime.datetime.now()
 		self.listOfTransactions = []
