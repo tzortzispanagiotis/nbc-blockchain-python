@@ -34,6 +34,17 @@ def get_wallets():
     # body = json.dumps(wallets)
     return jsonify(wall=wallets)
 
+@app.route('/getutxo', methods=['GET'])
+def get_utxos():
+    utxos = []
+    for i in _node.UTXO:
+        utxos.append(i.to_dict())
+    return jsonify(utxo=utxos)
+
+@app.route('/getchain', methods=['GET'])
+def get_chain():
+    return jsonify(chain=_node.chain)    
+
 #bootstrap ONLY:
 @app.route('/addnode', methods=['POST'])
 def add_node():
@@ -49,7 +60,8 @@ def add_node():
 @app.route('/receivegenesis', methods = ['POST'])
 def receive_genesis():
     a = request.get_json(force=True)
-    print(a)
+    # print(a)
+    _node.getGenesisBlock(a)
     return jsonify(status="ok")
 
 @app.route('/receivewallets', methods = ['POST'])

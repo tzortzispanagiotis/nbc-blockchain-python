@@ -53,9 +53,8 @@ class GenesisTransaction:
         d = {
             #'sender_address': self.sender_address
             'receiver_address': self.receiver_address,
-            'amount': self.amount
+            'amount': self.amount,
             'transaction_id': self.transaction_id
-
         }
         return d
              

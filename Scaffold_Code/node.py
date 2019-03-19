@@ -54,9 +54,10 @@ class Node: #creation of bootstap node
 		genblock = block.GenesisBlock(genesis_transactions)
 		trans_dict = []
 		for i in genblock.listOfTransactions:
-			trans_dict.append(i.to_dict)
-		gen
+			trans_dict.append(i.to_dict())
+		genblock.listOfTransactions = trans_dict
 		genblock_final = genblock.to_dict()
+		# print(genblock_final)
 		body = json.dumps(genblock_final)
 		for i in self.ring:
 			r = requests.post('http://'+i['ip']+':'+i['port']+'/receivegenesis', data = body )
@@ -78,17 +79,18 @@ class Node: #creation of bootstap node
 		new_transaction = transaction.Transaction(wallet , receiver , amount , traninput)
 		new_transaction.add_id_to_output()	
 		new= new_transaction.to_dict1(include_hash=True) 
-		verified_transactions.append(new)
+		self.verified_transactions.append(new)
 		return new  
 
 	def broadcast_transaction(self):
 		return 1
+
 	def getGenesisBlock(self,gblock):
 		#put genesis block in chain
 		self.chain.append(gblock)
 		#crete utxos and append them to the list 
-		for i in range(1,6):
-			out = transaction.TransactionOutput(gblock['recipient'] , gblock['amount'])
+		for i in gblock['transactions']:
+			out = transaction.TransactionOutput(i['receiver_address'] , i['amount'])
 			self.UTXO.append(out)
 
 
