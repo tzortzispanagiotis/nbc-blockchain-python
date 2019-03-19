@@ -1,19 +1,18 @@
-from import collections
-
-import blockchain
+from collections import OrderedDict
 import hashlib
 import json
 import datetime
-import coll
+
+
 class Block:
 	def __init__(self, previousHash, currentbl):
 		##set
 
 		self._previousHash = previousHash
-		self._timestamp =datetime.datetime.now()
+		self._timestamp = datetime.datetime.now()
 		self.listOfTransactions = []
-		self.blocknumber=currentbl.getblocknum()+1
-		self.nonce = ""
+		self.blocknumber = currentbl.getblocknum()+1
+		self.nonce = None
 		#self.currenthash = None
 
 	def getblocknum(self):
@@ -35,16 +34,20 @@ class Block:
 			})
 		return d
 
-	def add_nonce(self,n):
+	def add_nonce(self, n):
 		self.nonce = n
 
-	def myHash(self):
-        
-		return hashlib.sha256(json.dumps(self.to_dict(include_nonce=false)))
-		#allios tha exw an thelw na ta kanw prin json.dumps
-		# block_string = json.dumps(block, sort_keys=True).encode()
-        
-        # return hashlib.sha256(block_string).hexdigest()
+	def add_hash(self, n):
+		self.currenthash = n
+
+	# def myHash(self):
+	# 		h = hashlib.sha256(json.dumps(self.to_dict()))
+	# 		self.currenthash = h
+	# 		return h
+
+		#calculate self.hash
+	def getHash(self):
+		return self.currenthash
 
 
 	
