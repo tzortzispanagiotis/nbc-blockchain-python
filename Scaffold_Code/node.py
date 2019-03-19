@@ -12,18 +12,12 @@ class Node: #creation of bootstap node
 		self.chain = []
 		#self.current_id_count
 		self.wallet = self.create_wallet()
-
+        self.verified_transactions=[]
 		self.transaction_pool = []
 		#utxo==transaction_output
 		self.UTXO = []
 		#slef.ring[]   #here we store information for every node, as its id, its address (ip:port) its public key and its balance 
 
-
-
-
-	#def create_new_block(previousHash): #an einai to proto 
-				
-		
 
 		
 	def create_wallet(self):
@@ -45,7 +39,9 @@ class Node: #creation of bootstap node
 						self.UTXO.remove(i)
 			new_transaction = transaction.Transaction(wallet , receiver , amount , traninput)
 			new_transaction.add_id_to_output()	
-			return new_transaction.to_dict1()   
+			new= new_transaction.to_dict1(include_hash=True) 
+			verified_transactions.append(new)
+			return new  
 		#remember to broadcast it
 
 
@@ -77,6 +73,7 @@ class Node: #creation of bootstap node
 				out2=transaction.TransactionOutput(_transaction['sender'] ,sum1-_transaction['amount'])
 				self.UTXO.append(out1)
 				self.UTXO.append(out2)
+				self.verified_transactions.append(transaction)
 		
 
 	def add_transaction_to_block(self, _transaction ):
@@ -156,7 +153,21 @@ class Node: #creation of bootstap node
 				return True
 			else: 
 				transactions=block['transactions']
+				#check  all that transactions in received block are verified
 				for t in transactions:
+					flag=0
+					for vt in self.verified_transactions:
+						if t['id']==vt['id'] :
+							flag=1
+					if flag==0:
+						return False
+					flag=0
+				#if all transactions in block are verified remove them from verified_trans
+				for t in transactions:
+					for vt in self.verified_transactions:
+						if t['id']==vt['id'] :
+							self.verified_transactions.remove(vt)
+			
 					for mytrans in self.current_block:
 						if (t.transaction_id == mytrans.transaction_id):
 							self.current_block.remove(mytrans) 

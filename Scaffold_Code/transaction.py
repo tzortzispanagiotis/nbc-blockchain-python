@@ -69,7 +69,7 @@ class Transaction:
     def getid(self):
         return self.transaction_id
 
-    def to_dict1(self, include_signature = True):
+    def to_dict1(self, include_signature = True , include_hash=False):
         d = {"sender": self.sender_address,
              "receiver": self.receiver_address,
              "amount": self.amount,
@@ -80,6 +80,8 @@ class Transaction:
         #inputs kai ta outputs
         if include_signature:
             d["signature"] = self.signature
+        if include_hash:
+            d["id"]= self.transaction_id
         return d
         
     def hash_transaction(self):
