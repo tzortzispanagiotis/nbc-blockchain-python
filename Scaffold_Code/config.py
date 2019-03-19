@@ -1,1 +1,2 @@
-max_transactions = 10 
+max_transactions = 10
+numofnodes = 5

@@ -37,7 +37,7 @@ class Node: #creation of bootstap node
 			}
 		self.ring.append(temp)
 		print(self.ring)
-		if len(self.ring) == 2:
+		if len(self.ring) == config.numofnodes:
 			body = json.dumps(self.ring)
 			for i in self.ring:
 				print("HI")
