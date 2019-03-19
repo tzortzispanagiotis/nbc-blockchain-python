@@ -46,6 +46,11 @@ def add_node():
     _node.register_node_to_ring(newNode)
     return jsonify(status='successful')
 
+@app.route('/receivegenesis', methods = ['POST'])
+def receive_genesis():
+    a = request.get_json(force=True)
+    print(a)
+    return jsonify(status="ok")
 
 @app.route('/receivewallets', methods = ['POST'])
 def receive_wallets():

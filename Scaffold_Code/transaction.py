@@ -48,11 +48,13 @@ class GenesisTransaction:
         self.receiver_address = receiver
         self.amount = amount
         self.transaction_id = 1
+    
     def to_dict(self):
-     d = {
+        d = {
             #'sender_address': self.sender_address
-            'recipient': self.receiver_address,
+            'receiver_address': self.receiver_address,
             'amount': self.amount
+            'transaction_id': self.transaction_id
 
         }
         return d

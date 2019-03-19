@@ -4,7 +4,8 @@ import json
 import datetime
 
 class GenesisBlock:
-	def _init_ (self, genesis_tr):
+	def __init__(self, genesis_tr):
+		print("a")
 		self._previousHash = 0
 		self._timestamp = datetime.datetime.now()
 		self.listOfTransactions = genesis_tr

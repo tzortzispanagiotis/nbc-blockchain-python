@@ -20,7 +20,7 @@ class Node: #creation of bootstap node
 		self.chain = []
 		#self.current_id_count
 		self.wallet = self.create_wallet()
-        self.verified_transactions=[]
+		self.verified_transactions = []
 		#utxo==transaction_output
 		self.UTXO = []
 		self.ring = [{
@@ -51,11 +51,15 @@ class Node: #creation of bootstap node
 			self.create_genesis_transactions()
 
 	def create_genesis_block(self, genesis_transactions):
-		genblock = GenesisBlock(genesis_transactions)
-		genblock=genblock.to_dict()
-		body = json.dumps(genblock)
-			for i in self.ring:
-				r = requests.post('http://'+i['ip']+':'+i['port']+'/receivewallets', data = body )
+		genblock = block.GenesisBlock(genesis_transactions)
+		trans_dict = []
+		for i in genblock.listOfTransactions:
+			trans_dict.append(i.to_dict)
+		gen
+		genblock_final = genblock.to_dict()
+		body = json.dumps(genblock_final)
+		for i in self.ring:
+			r = requests.post('http://'+i['ip']+':'+i['port']+'/receivegenesis', data = body )
 
 	def create_genesis_transactions(self):
 		genesis_transactions = []
@@ -142,7 +146,7 @@ class Node: #creation of bootstap node
 	def broadcast_block(self):
 		return True
 
-	def search_proof(self, message , config.difficulty):
+	def search_proof(self, message):
 		i = 0
 		prefix = '0' * config.difficulty
 		while True:
