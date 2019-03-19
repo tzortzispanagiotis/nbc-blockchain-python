@@ -113,6 +113,11 @@ class Node: #creation of bootstap node
 		nonce = self.search_proof(message, config.difficulty)
 		_block.add_nonce(nonce)
 		# +++++++ 
+		for t in block['transactions']:
+			for vt in self.verified_transactions:
+				if t['id']==vt['id']:
+					self.verified_transactions.remove(vt)
+
 		self.chain.append(_block)
 		self.broadcast_block()
 
@@ -160,10 +165,11 @@ class Node: #creation of bootstap node
 						})
 			previoushash = hashlib.sha256((previousmessage+previousblock['nonce']).hexdigest())
 			if (block['previous_hash'] != previoushash):
-				flag = self.resolve_conflicts()
-				if (flag==False): 
-					return False
-				return True
+					flag = self.resolve_conflicts()
+					if (flag==False): 
+						return False
+			
+					return True
 			else: 
 				transactions=block['transactions']
 				#check  all that transactions in received block are verified
@@ -180,6 +186,7 @@ class Node: #creation of bootstap node
 					for vt in self.verified_transactions:
 						if t['id']==vt['id'] :
 							self.verified_transactions.remove(vt)
+				#remove transactions in block from your pool
 			    for t in transactions:
 					for mytrans in self.current_block:
 						if (t['id']== mytrans['id']):
@@ -211,9 +218,6 @@ class Node: #creation of bootstap node
 				return False
 
 			# Check that the Proof of Work is correct
-			#Delete the reward transaction
-			
-			# Need to make sure that the dictionary is ordered. Otherwise we'll get a different hash
 			
 			if not self.valid_proof(block):
 				return False
@@ -226,21 +230,33 @@ class Node: #creation of bootstap node
 
 
 	def resolve_conflicts(self):
-		return True
-	# resolve correct chain
-	#changed = False
 
-	#if received_block['previousHash'] == current_block['previousHash']:
-		#self.block_pool.append(received_block)
-	#else:
-		#for b in self.block_pool:
-		#	if b['previousHash'] == current_block['previousHash'] and received_block[
-			#	'previousHash'] == block.getHash(b):
-			#	self.chain[-1] = b
-			#	self.chain.append(received_block)
-			#	changed = True
+		neighbours = self.nodes
+        new_chain = None
 
-	#return changed
+        # an oles oi alisides exoun idio megethos de kan w tpt kai ta conflicts th epilithoun sto epomeno block
+        max_length = len(self.chain)
+        for node in neighbours:
+            print('http://' + node + '/chain')
+            response = requests.get('http://' + node + '/chain')
+
+            if response.status_code == 200:
+                length = response.json()['length']
+                chain = response.json()['chain']
+
+                # Check if the length is longer and the chain is valid
+                if length > max_length and self.valid_chain(chain):
+                    max_length = length
+                    new_chain = chain
+
+        # antikatastise alisida
+        if new_chain:
+            self.chain = new_chain
+		#ksnadimiourgise utxos
+            return True
+
+        return False
+
 
 
 
