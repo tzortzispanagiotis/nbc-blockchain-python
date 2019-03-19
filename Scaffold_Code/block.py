@@ -29,12 +29,12 @@ class GenesisBlock:
 		return d
 		
 class Block:
-	def __init__(self, previousHash, currentbl):
+	def __init__(self, previousHash, listoftransactions, last_block):
 		##set
 		self._previousHash = previousHash
 		self._timestamp = datetime.datetime.now()
-		self.listOfTransactions = []
-		self.blocknumber = currentbl.getblocknum()+1
+		self.listOfTransactions = listoftransactions
+		self.blocknumber = last_block+1
 		self.nonce = None
 		#self.currenthash = None
 

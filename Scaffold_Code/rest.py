@@ -83,8 +83,9 @@ def create_transaction():
 @app.route('/receivetransaction', methods = ['POST'])
 def receive_transaction():
     a = request.get_json(force=True)
-    print("I ENTERED RECEIVE, HERE'S THE TRANSACTION")
-    print(a)
+    # print("I ENTERED RECEIVE, HERE'S THE TRANSACTION")
+    # print(a)
+    _node.add_transaction_to_block(a)
     return jsonify(status="ok")
 # get all transactions in the blockchain
 

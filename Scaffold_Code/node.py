@@ -36,14 +36,14 @@ class Node: #creation of bootstap node
 		return wallet.Wallet()
 
 	def register_node_to_ring(self, newNode): #only bootstrap can do that
-		print("Entered reg_ring")
+		# print("Entered reg_ring")
 		temp = {
 				'pkey' : newNode['pkey'],
 				'ip'		: newNode['ip'],
 				'port'   : newNode['port']
 			}
 		self.ring.append(temp)
-		print(self.ring)
+		# print(self.ring)
 		if len(self.ring) == config.numofnodes:
 			body = json.dumps(self.ring)
 			for i in self.ring:
@@ -77,7 +77,7 @@ class Node: #creation of bootstap node
 			if i.recipient == self.wallet.address:
 				traninput.append(i)
 				bal = bal + i.amount
-				self.UTXO.remove(i)
+				# self.UTXO.remove(i)
 		new_transaction = transaction.Transaction(self.wallet, receiver, amount, traninput)
 		new_transaction.add_id_to_output()
 		# self.UTXO.append(new_transaction.transaction_outputs[0])	
@@ -100,20 +100,21 @@ class Node: #creation of bootstap node
 			out = transaction.TransactionOutput(i['receiver_address'] , i['amount'])
 			self.UTXO.append(out)
 
-
 	def validate_transaction(self, _transaction):
 		tr = {"sender": _transaction['sender'],
 			 "receiver": _transaction['receiver'],
              "amount": _transaction['amount'],
              "inputs": _transaction['inputs'],
-             "outputs": _transaction['outputs'] ,
+             "outputs": _transaction['outputs']
 		}
 		#sos ti object einai to transaction tha einai logika se morfi dict?
 		if (wallet.verify_signature(tr["sender"] , tr , _transaction['signature'])):
+			print("Je suis verifie")
 			traninput=[]
 			sum1=0
 			for i in self.UTXO:
-				if (i['recipient']==_transaction['sender']):
+				i_to_dict = i.to_dict()
+				if (i_to_dict['recipient'] == _transaction['sender']):
 					traninput.append(i)
 					sum1=sum1+i.amount
 			if (sum1>=_transaction['amount']):
@@ -123,45 +124,53 @@ class Node: #creation of bootstap node
 				#now create transaction outputs and add them at the utxo list
 				out1=transaction.TransactionOutput(_transaction['receiver'] , _transaction['amount'])
 				out2=transaction.TransactionOutput(_transaction['sender'] ,sum1-_transaction['amount'])
-				self.UTXO.append(out1.to_dict())
-				self.UTXO.append(out2.to_dict())
-				self.verified_transactions.append(transaction)
+				self.UTXO.append(out1)
+				self.UTXO.append(out2)
+				self.verified_transactions.append(_transaction)
+				# print(self.verified_transactions)
+			return True
+		else:
+			return False
 		
 	def add_transaction_to_block(self, _transaction ):
 		if self.validate_transaction(_transaction):
 			self.current_block.append(_transaction)
+			print (len(self.current_block))
 			if len(self.current_block) == config.max_transactions:
+				print ("mpika man")
 				previousblock = self.chain[-1]
 				previousmessage = OrderedDict(
 						{'transactions': previousblock['transactions'],
 						 'previousHash':  previousblock['previousHash'],
 						 #'nonce': self.nonce ,
-						 'number': previousblock['blocknumber']
+						 'number': previousblock['number']
 						})
-				previoushash = hashlib.sha256((previousmessage+previousblock['nonce']).hexdigest())
-				new_block = block.Block(previoushash, self.current_block)
+				previoushash = hashlib.sha256((str(previousmessage)+previousblock['nonce']).encode()).hexdigest()
+				new_block = block.Block(previoushash, self.current_block, previousblock['number'])
 				# new_block.myHash()
 				self.mine_block(new_block)
 
 	def mine_block( self, _block):
+		print("I am mining")
 		last_block = self.chain[-1]
 		message = _block.to_dict(include_nonce=False)
-		nonce = self.search_proof(message, config.difficulty)
+		nonce = self.search_proof(message)
 		_block.add_nonce(nonce)
 		# +++++++ 
 		self.chain.append(_block)
 		self.broadcast_block()
 
 	def broadcast_block(self):
-		return True
+		print('i am broadcasting!!!!!!!')
 
 	def search_proof(self, message):
 		i = 0
 		prefix = '0' * config.difficulty
 		while True:
 			nonce = str(i)
-			digest = hashlib.sha256(message + nonce).hexdigest()
+			digest = hashlib.sha256((str(message) + nonce).encode()).hexdigest()
 			if digest.startswith(prefix):
+				print(digest)
 				return nonce
 			i += 1
 
@@ -174,7 +183,7 @@ class Node: #creation of bootstap node
 						})
 						#i mipos d = block.to_dict??
 		nonce = _block['nonce']
-		digest = hashlib.sha256(d + nonce).hexdigest()
+		digest = hashlib.sha256(str(d) + nonce).hexdigest()
 		if ( digest.startswith('0' * config.difficulty)):
 			return True
 		else:

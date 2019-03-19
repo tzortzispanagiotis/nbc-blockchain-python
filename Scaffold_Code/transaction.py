@@ -67,7 +67,7 @@ class Transaction:
         self.amount = value #το ποσό που θα μεταφερθεί
         self.transaction_inputs = UTXOS
         self.transaction_outputs = self.createOutputs(wallet.balance(self.transaction_inputs))#λίστα από Transaction Output
-        self.signature = wallet.sign_transaction(self.to_dict1(False))
+        self.signature = wallet.sign_transaction(self.to_dict1(False, False))
         self.transaction_id = self.hash_transaction() #το hash του transaction
 
     def createOutputs(self , balance):
