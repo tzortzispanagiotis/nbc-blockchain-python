@@ -43,10 +43,20 @@ class TransactionOutput:
     def get_receiver(self):
          return  self.recipient
 
-class GenesisTrasnaction:
+class GenesisTransaction:
     def __init__(self, receiver, amount):
         self.receiver_address = receiver
         self.amount = amount
+        self.transaction_id = 1
+    def to_dict(self):
+     d = {
+            #'sender_address': self.sender_address
+            'recipient': self.receiver_address,
+            'amount': self.amount
+
+        }
+        return d
+             
 
 class Transaction:
     def __init__(self, wallet, recipient_address, value, UTXOS):

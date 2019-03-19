@@ -52,6 +52,7 @@ class Node: #creation of bootstap node
 
 	def create_genesis_block(self, genesis_transactions):
 		genblock = GenesisBlock(genesis_transactions)
+		genblock=genblock.to_dict()
 		body = json.dumps(genblock)
 			for i in self.ring:
 				r = requests.post('http://'+i['ip']+':'+i['port']+'/receivewallets', data = body )
@@ -78,6 +79,14 @@ class Node: #creation of bootstap node
 
 	def broadcast_transaction(self):
 		return 1
+	def getGenesisBlock(self,gblock):
+		#put genesis block in chain
+		self.chain.append(gblock)
+		#crete utxos and append them to the list 
+		for i in range(1,6):
+			out = transaction.TransactionOutput(gblock['recipient'] , gblock['amount'])
+			self.UTXO.append(out)
+
 
 	def validate_transaction(self, _transaction):
 		tr = {"sender": _transaction['sender'],
@@ -91,7 +100,7 @@ class Node: #creation of bootstap node
 			traninput=[]
 			sum1=0
 			for i in self.UTXO:
-				if (i.recepient==_transaction['sender']):
+				if (i['recipient']==_transaction['sender']):
 					traninput.append(i)
 					sum1=sum1+i.amount
 			if (sum1>=_transaction['amount']):
@@ -101,8 +110,8 @@ class Node: #creation of bootstap node
 				#now create transaction outputs and add them at the utxo list
 				out1=transaction.TransactionOutput(_transaction['receiver'] , _transaction['amount'])
 				out2=transaction.TransactionOutput(_transaction['sender'] ,sum1-_transaction['amount'])
-				self.UTXO.append(out1)
-				self.UTXO.append(out2)
+				self.UTXO.append(out1.to_dict())
+				self.UTXO.append(out2.to_dict())
 				self.verified_transactions.append(transaction)
 		
 	def add_transaction_to_block(self, _transaction ):

@@ -9,7 +9,7 @@ class GenesisBlock:
 		self._timestamp = datetime.datetime.now()
 		self.listOfTransactions = genesis_tr
 		self.blocknumber = 0
-		self.nonce = ""
+		self.nonce = "0"
 
 	def to_dict(self, include_nonce = True):
 		if include_nonce == False:
