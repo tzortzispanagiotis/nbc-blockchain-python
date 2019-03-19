@@ -5,12 +5,14 @@ class Node: #creation of bootstap node
 	def __init__(self, ip, port, bootstrapip, bootstrapport):
 		#self.NBC=100
 		##set
+		self.ip = ip
+		self.port = port
 		self.bootstrapip = bootstrapip
 		self.bootstrapport = bootstrapport
 		self.current_block  = [] #san transaction pool me transactions<=maximum
 		self.chain = []
 		#self.current_id_count
-		self.wallet = create_wallet()
+		self.wallet = self.create_wallet()
 		self.transaction_pool = []
 		#utxo==transaction_output
 		self.UTXO = []
@@ -27,16 +29,19 @@ class Node: #creation of bootstap node
 		return wallet.Wallet()
 
 	def register_node_to_ring(self, newNode): #only bootstrap can do that
+		print("Entered reg_ring")
 		temp = {
-				'wallet' : newNode['pkey'],
+				'pkey' : newNode['pkey'],
 				'ip'		: newNode['ip'],
 				'port'   : newNode['port']
 			}
 		self.ring.append(temp)
-		if len(self.ring) == 5:
+		print(self.ring)
+		if len(self.ring) == 2:
 			body = json.dumps(self.ring)
 			for i in self.ring:
-				r = requests.post(i.ip+':'+i.port+'/receivewallets', data = body )
+				print("HI")
+				r = requests.post('http://'+i['ip']+':'+i['port']+'/receivewallets', data = body )
 
 		#add this node to the ring, only the bootstrap node can add a node to the ring after checking his wallet and ip:port address
 		#bottstrap node informs all other nodes and gives the request node an id and 100 NBCs
