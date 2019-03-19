@@ -1,53 +1,69 @@
-from Scaffold_Code import block, wallet , config, transaction
-
+import requests, json
 from collections import OrderedDict
-
 import hashlib
 
+import block
+import wallet
+import config
+import transaction
+
+
 class Node: #creation of bootstap node
-	def __init__(self):
+	def __init__(self, ip, port, bootstrapip, bootstrapport):
 		#self.NBC=100
 		##set
+		self.ip = ip
+		self.port = port
+		self.bootstrapip = bootstrapip
+		self.bootstrapport = bootstrapport
 		self.current_block  = [] #san transaction pool me transactions<=maximum
 		self.chain = []
 		#self.current_id_count
 		self.wallet = self.create_wallet()
         self.verified_transactions=[]
-		self.transaction_pool = []
 		#utxo==transaction_output
 		self.UTXO = []
-		#slef.ring[]   #here we store information for every node, as its id, its address (ip:port) its public key and its balance 
-
-
+		self.ring = [{
+			'pkey' : self.wallet.address,
+			'ip'   : ip,
+			'port' : port
+		}]  
+		 #here we store information for every node, as its id, its address (ip:port) its public key and its balance 
+	#def create_new_block(previousHash): #an einai to proto 
 		
 	def create_wallet(self):
 		##create a wallet for this node, with a public key and a private key
 		return wallet.Wallet()
 
-	# def register_node_to_ring():
-    #    		return True
-
-		#add this node to the ring, only the bootstrap node can add a node to the ring after checking his wallet and ip:port address
-		#bottstrap node informs all other nodes and gives the request node an id and 100 NBCs
+	def register_node_to_ring(self, newNode): #only bootstrap can do that
+		print("Entered reg_ring")
+		temp = {
+				'pkey' : newNode['pkey'],
+				'ip'		: newNode['ip'],
+				'port'   : newNode['port']
+			}
+		self.ring.append(temp)
+		print(self.ring)
+		if len(self.ring) == config.numofnodes:
+			body = json.dumps(self.ring)
+			for i in self.ring:
+				r = requests.post('http://'+i['ip']+':'+i['port']+'/receivewallets', data = body )
 
 	def create_transaction(self, sender, receiver,amount ,  signature , wallet):
-			traninput = []
-			#inputs ola ta outputs pou exoun os receiver ton torino sender
-			for i in self.UTXO:
-					if (i.recepient==sender):
-						traninput.append(i)
-						self.UTXO.remove(i)
-			new_transaction = transaction.Transaction(wallet , receiver , amount , traninput)
-			new_transaction.add_id_to_output()	
-			new= new_transaction.to_dict1(include_hash=True) 
-			verified_transactions.append(new)
-			return new  
-		#remember to broadcast it
-
+		traninput = []
+		#inputs ola ta outputs pou exoun os receiver ton torino sender
+		for i in self.UTXO:
+			if (i.recepient==sender):
+				traninput.append(i)
+				self.UTXO.remove(i)
+		new_transaction = transaction.Transaction(wallet , receiver , amount , traninput)
+		new_transaction.add_id_to_output()	
+		new= new_transaction.to_dict1(include_hash=True) 
+		verified_transactions.append(new)
+		return new  
 
 	def broadcast_transaction(self):
 		return 1
-
 
 	def validate_transaction(self, _transaction):
 		tr = {"sender": _transaction['sender'],
@@ -75,9 +91,7 @@ class Node: #creation of bootstap node
 				self.UTXO.append(out2)
 				self.verified_transactions.append(transaction)
 		
-
 	def add_transaction_to_block(self, _transaction ):
-	
 		if self.validate_transaction(_transaction):
 			self.current_block.append(_transaction)
 			if len(self.current_block) == config.max_transactions:
@@ -93,13 +107,12 @@ class Node: #creation of bootstap node
 				# new_block.myHash()
 				self.mine_block(new_block)
 
-
 	def mine_block( self, _block):
 		last_block = self.chain[-1]
 		message = _block.to_dict(include_nonce=False)
 		nonce = self.search_proof(message, config.difficulty)
 		_block.add_nonce(nonce)
-		+++++++ 
+		# +++++++ 
 		self.chain.append(_block)
 		self.broadcast_block()
 
