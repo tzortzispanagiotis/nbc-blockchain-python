@@ -1,5 +1,6 @@
 import wallet , config
 import requests, json
+
 class Node: #creation of bootstap node
 	def __init__(self, ip, port, bootstrapip, bootstrapport):
 		#self.NBC=100
