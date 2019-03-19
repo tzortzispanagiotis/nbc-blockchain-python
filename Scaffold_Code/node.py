@@ -1,12 +1,14 @@
 import requests, json
 from collections import OrderedDict
 import hashlib
+from multiprocessing.dummy import Pool
 
 import block
 import wallet
 import config
 import transaction
 
+pool = Pool(100)
 
 class Node: #creation of bootstap node
 	def __init__(self, ip, port, bootstrapip, bootstrapport):
@@ -89,8 +91,10 @@ class Node: #creation of bootstap node
 
 	def broadcast_transaction(self, dict):
 		body = json.dumps(dict)
+		futures = []
 		for i in self.ring:
-			r = requests.post('http://'+i['ip']+':'+i['port']+'/receivetransaction', data = body )
+			target_url = 'http://'+i['ip']+':'+i['port']+'/receivetransaction'
+			futures.append(pool.apply_async(requests.post, [target_url,body]))
 
 	def getGenesisBlock(self,gblock):
 		#put genesis block in chain
@@ -147,8 +151,10 @@ class Node: #creation of bootstap node
 						})
 				previoushash = hashlib.sha256((str(previousmessage)+previousblock['nonce']).encode()).hexdigest()
 				new_block = block.Block(previoushash, self.current_block, previousblock['number'])
+				self.current_block = []
 				# new_block.myHash()
 				self.mine_block(new_block)
+				return
 
 	def mine_block( self, _block):
 		print("I am mining")
@@ -157,11 +163,13 @@ class Node: #creation of bootstap node
 		nonce = self.search_proof(message)
 		_block.add_nonce(nonce)
 		# +++++++ 
-		self.chain.append(_block)
+		self.chain.append(_block.to_dict())
 		self.broadcast_block()
+		return
 
 	def broadcast_block(self):
 		print('i am broadcasting!!!!!!!')
+		return
 
 	def search_proof(self, message):
 		i = 0
