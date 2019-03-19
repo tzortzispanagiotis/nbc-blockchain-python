@@ -12,8 +12,8 @@ class Block:
 		self._timestamp = datetime.datetime.now()
 		self.listOfTransactions = []
 		self.blocknumber = currentbl.getblocknum()+1
-		self.nonce = ""
-		self.currenthash = None
+		self.nonce = None
+		#self.currenthash = None
 
 	def getblocknum(self):
 		return self.blocknumber
