@@ -71,7 +71,21 @@ def receive_wallets():
     _node.ring = a
     return jsonify(status="ok")
     
-
+@app.route('/createtransaction', methods = ['POST'])
+def create_transaction():
+    a = request.get_json(force=True)
+    _wallet = a['receiver_address']
+    amount = a['amount']
+    new_transaction = _node.create_transaction(_wallet, amount)
+    _node.broadcast_transaction(new_transaction)
+    return jsonify(status="ok")
+    
+@app.route('/receivetransaction', methods = ['POST'])
+def receive_transaction():
+    a = request.get_json(force=True)
+    print("I ENTERED RECEIVE, HERE'S THE TRANSACTION")
+    print(a)
+    return jsonify(status="ok")
 # get all transactions in the blockchain
 
 # @app.route('/transactions/get', methods=['GET'])

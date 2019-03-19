@@ -60,10 +60,10 @@ class GenesisTransaction:
              
 
 class Transaction:
-    def __init__(self, wallet, recipient_address, value, UTXOS):
+    def __init__(self, wallet, receiver_address, value, UTXOS):
         #self.wallet=wallet
-        self.sender_address = wallet.address() #To public key του wallet από το οποίο προέρχονται τα χρήματα
-        self.receiver_address = recipient_address #To public key του wallet στο οποίο θα καταλήξουν τα χρήματα
+        self.sender_address = wallet.address #To public key του wallet από το οποίο προέρχονται τα χρήματα
+        self.receiver_address = receiver_address #To public key του wallet στο οποίο θα καταλήξουν τα χρήματα
         self.amount = value #το ποσό που θα μεταφερθεί
         self.transaction_inputs = UTXOS
         self.transaction_outputs = self.createOutputs(wallet.balance(self.transaction_inputs))#λίστα από Transaction Output
@@ -87,7 +87,7 @@ class Transaction:
         d = {"sender": self.sender_address,
              "receiver": self.receiver_address,
              "amount": self.amount,
-             "inputs": list(map(TransactionInput.to_dict, self.transaction_inputs)),
+             "inputs": list(map(TransactionOutput.to_dict, self.transaction_inputs)),
              "outputs": list(map(TransactionOutput.to_dict, self.transaction_outputs)),
         }
         #to message pou upografw kai meta elegxw an antistoixei stin upografi apoteleitai mono apo ta 
@@ -99,7 +99,7 @@ class Transaction:
         return d
         
     def hash_transaction(self):
-        return hashlib.sha256(json.dumps(self.to_dict1(True)))
+        return hashlib.sha256(json.dumps(self.to_dict1(True)).encode()).hexdigest()
 
     def get_receiver(self):
         return self.receiver_address

@@ -31,13 +31,13 @@ class Wallet:
 	def balance(self, utxo_list):
 		balance = 0
 		for tx in utxo_list:
-			if tx.get_receiver() == self._public_key:
+			if tx.get_receiver() == self.address:
 				balance = balance+tx.amount
 		return balance
 		# for trans
 
 	# na to dw
-	def sign_transaction(self, message, sender_private_key):
+	def sign_transaction(self, message):
 		h = SHA.new(str(message).encode('utf8'))
 		return binascii.hexlify(self._signer.sign(h)).decode('ascii')
 

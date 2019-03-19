@@ -69,21 +69,28 @@ class Node: #creation of bootstap node
 			genesis_transactions.append(new_trans)
 		self.create_genesis_block(genesis_transactions)
 
-	def create_transaction(self, sender, receiver,amount ,  signature , wallet):
+	def create_transaction(self, receiver, amount):
 		traninput = []
 		#inputs ola ta outputs pou exoun os receiver ton torino sender
+		bal = 0
 		for i in self.UTXO:
-			if (i.recepient==sender):
+			if i.recipient == self.wallet.address:
 				traninput.append(i)
+				bal = bal + i.amount
 				self.UTXO.remove(i)
-		new_transaction = transaction.Transaction(wallet , receiver , amount , traninput)
-		new_transaction.add_id_to_output()	
+		new_transaction = transaction.Transaction(self.wallet, receiver, amount, traninput)
+		new_transaction.add_id_to_output()
+		# self.UTXO.append(new_transaction.transaction_outputs[0])	
+		# self.UTXO.append(new_transaction.transaction_outputs[1])
+		# self.verified_transactions.append(new_transaction)
+		# self.add_transaction_to_block(new_transaction)
 		new= new_transaction.to_dict1(include_hash=True) 
-		self.verified_transactions.append(new)
 		return new  
 
-	def broadcast_transaction(self):
-		return 1
+	def broadcast_transaction(self, dict):
+		body = json.dumps(dict)
+		for i in self.ring:
+			r = requests.post('http://'+i['ip']+':'+i['port']+'/receivetransaction', data = body )
 
 	def getGenesisBlock(self,gblock):
 		#put genesis block in chain
