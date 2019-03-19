@@ -79,6 +79,7 @@ class Node: #creation of bootstap node
 				self.UTXO.append(out2)
 		
 
+<<<<<<< HEAD
 	def add_transaction_to_block(self, _transaction , previousHash):
 		if self.validate_transaction(_transaction):
 			self.current_block.append(_transaction)
@@ -95,6 +96,29 @@ class Node: #creation of bootstap node
 		_block.add_nonce(nonce)
 		self.chain.append(_block)
 		self.broadcast_block()
+=======
+	def add_transaction_to_block(current_block , transaction , previousHash): 
+		#if
+		#if enough transactions  mine
+		if self.validate_transaction(transaction):
+			if (len(current_block) == config.max_transactions):
+				new_block = Block(previousHash , current_block)
+				new_block.myHash()
+				mine_block(new_block)
+			else:
+				current_block.append(transaction)
+
+
+
+	def mine_block( block , self  ):
+		 last_block = self.chain[-1]
+		 message = last_block.to_dict()
+		 nonce = self.search_proof(message)
+		 block.add_nonce(nonce)
+		 self.broadcast_block()
+
+		 chain.add_block_to_mychain(block)
+>>>>>>> dafne2
 
 	def broadcast_block():
 		return True
@@ -137,6 +161,12 @@ class Node: #creation of bootstap node
 					return False
 				return True
 			else: 
+				transactions=block['transactions']
+				for t in transactions:
+					for mytrans in self.current_block:
+						if (t.transaction_id ==mytrans.transaction_id):
+							self.current_block.remove(mytrans) 
+				chain.append(block)
 				return True
 		return False
 			
