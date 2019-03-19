@@ -180,9 +180,9 @@ class Node: #creation of bootstap node
 					for vt in self.verified_transactions:
 						if t['id']==vt['id'] :
 							self.verified_transactions.remove(vt)
-			
+			    for t in transactions:
 					for mytrans in self.current_block:
-						if (t.transaction_id == mytrans.transaction_id):
+						if (t['id']== mytrans['id']):
 							self.current_block.remove(mytrans) 
 				self.chain.append(block)
 				return True
@@ -200,7 +200,14 @@ class Node: #creation of bootstap node
 
 		while current_index < len(chain):
 			block = chain[current_index]
-			if block['previous_hash'] != hashlib.sha256(last_block.to_dict(include_nonce= False)+last_block['nonce']).hexdigest():
+			previousmessage = OrderedDict(
+						{'transactions': last_block['transactions'],
+						 'previousHash':  last_block['previousHash'],
+						 #'nonce': self.nonce ,
+						 'number': last_block['blocknumber']
+						})
+			previoushash = hashlib.sha256((previousmessage+last_block['nonce']).hexdigest())
+			if block['previous_hash'] != previoushash:
 				return False
 
 			# Check that the Proof of Work is correct
