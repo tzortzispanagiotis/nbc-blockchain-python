@@ -181,19 +181,10 @@ class Node: #creation of bootstap node
 
 def resolve_conflicts(self, received_block, current_block):
 	# resolve correct chain
-	changed = False
+	new_chain = None
 
-	if received_block['previousHash'] == current_block['previousHash']:
-		self.block_pool.append(received_block)
-	else:
-		for b in self.block_pool:
-			if b['previousHash'] == current_block['previousHash'] and received_block[
-				'previousHash'] == block.getHash(b):
-				self.chain[-1] = b
-				self.chain.append(received_block)
-				changed = True
-
-	return changed
+	# We're only looking for chains longer than ours
+	max_length = len(self.chain)
 
 
 
