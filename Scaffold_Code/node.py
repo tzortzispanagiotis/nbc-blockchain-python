@@ -1,4 +1,4 @@
-import block, wallet , config, transaction
+from Scaffold_Code import block, wallet , config, transaction
 
 from collections import OrderedDict
 
@@ -49,7 +49,7 @@ class Node: #creation of bootstap node
 		#remember to broadcast it
 
 
-	def broadcast_transaction():
+	def broadcast_transaction(self):
 		return 1
 
 
@@ -61,30 +61,32 @@ class Node: #creation of bootstap node
              "outputs": _transaction.outputs ,
 		}
 		#sos ti object einai to transaction tha einai logika se morfi dict?
-		if (wallet.verify_signature(tr["sender"] , tr , transaction.signature)):
+		if (wallet.verify_signature(tr["sender"] , tr , _transaction.signature)):
 			traninput=[]
 			sum1=0
 			for i in self.UTXO:
-				if (i.recepient==transaction.sender_address):
+				if (i.recepient==_transaction.sender_address):
 					traninput.append(i)
 					sum1=sum1+i.amount
-			if (sum1>=transaction.amount):
+			if (sum1>=_transaction.amount):
 			#eparki xrimata gia tin metafora
 				for t in traninput:
 					self.UTXO.remove(t)
 				#now create transaction outputs and add them at the utxo list
-				out1=TransactionOutput(transaction.receiver_address , transaction.amount)
-				out2=TransactionOutput(transaction.sender_address ,sum1-amount)
+				out1=transaction.TransactionOutput(_transaction.receiver_address , _transaction.amount)
+				out2=transaction.TransactionOutput(_transaction.sender_address ,sum1-_transaction.amount)
 				self.UTXO.append(out1)
 				self.UTXO.append(out2)
 		
 
-<<<<<<< HEAD
-	def add_transaction_to_block(self, _transaction , previousHash):
+	def add_transaction_to_block(self, _transaction ):
 		if self.validate_transaction(_transaction):
 			self.current_block.append(_transaction)
 			if len(self.current_block) == config.max_transactions:
-				new_block = block.Block(previousHash, self.current_block)
+				previousblock = self.chain[-1]
+				previoushash = hashlib.sha256((previousblock.to_dict(include_nonce = False))+previousblock['nonce']).hexdigest()
+
+				new_block = block.Block(previoushash, self.current_block)
 				# new_block.myHash()
 				self.mine_block(new_block)
 
@@ -96,31 +98,8 @@ class Node: #creation of bootstap node
 		_block.add_nonce(nonce)
 		self.chain.append(_block)
 		self.broadcast_block()
-=======
-	def add_transaction_to_block(current_block , transaction , previousHash): 
-		#if
-		#if enough transactions  mine
-		if self.validate_transaction(transaction):
-			if (len(current_block) == config.max_transactions):
-				new_block = Block(previousHash , current_block)
-				new_block.myHash()
-				mine_block(new_block)
-			else:
-				current_block.append(transaction)
 
-
-
-	def mine_block( block , self  ):
-		 last_block = self.chain[-1]
-		 message = last_block.to_dict()
-		 nonce = self.search_proof(message)
-		 block.add_nonce(nonce)
-		 self.broadcast_block()
-
-		 chain.add_block_to_mychain(block)
->>>>>>> dafne2
-
-	def broadcast_block():
+	def broadcast_block(self):
 		return True
 
 	def search_proof(self, message , difficulty):
@@ -128,7 +107,7 @@ class Node: #creation of bootstap node
 		prefix = '0' * difficulty
 		while True:
 			nonce = str(i)
-			digest = dumb_hash(message + nonce)
+			digest = hashlib.sha256(message + nonce).hexdigest()
 			if digest.startswith(prefix):
 				return nonce
 			i += 1
@@ -140,9 +119,10 @@ class Node: #creation of bootstap node
 						 #'nonce': self.nonce ,
 						 'number': block['blocknumber']
 						})
+						#i mipos d = block.to_dict??
 		nonce = block['nonce']
-		digest = dumb_hash(message + nonce)
-		if ( digest.startswith('0' * difficulty)):
+		digest = hashlib.sha256(d + nonce).hexdigest()
+		if ( digest.startswith('0' * config.difficulty)):
 			return True
 		else:
 			return False
@@ -151,12 +131,12 @@ class Node: #creation of bootstap node
 
 	def validate_block(self ,block):
 		#check proof of work 
-		flag1 = valid_proof(block)
+		flag1 = self.valid_proof(block)
 		if (flag1):
 		#check previous hash
 			my_last_block=self.chain[-1]
-			if (block['previous_hash'] != my_last_block.gethash()):
-				flag = resolve_conflicts(self)
+			if (block['previous_hash'] != hashlib.sha256(my_last_block.to_dict(include_nonce= False)+my_last_block['nonce'])).hexdigest():
+				flag = self.resolve_conflicts()
 				if (flag==False): 
 					return False
 				return True
@@ -166,7 +146,7 @@ class Node: #creation of bootstap node
 					for mytrans in self.current_block:
 						if (t.transaction_id ==mytrans.transaction_id):
 							self.current_block.remove(mytrans) 
-				chain.append(block)
+				self.chain.append(block)
 				return True
 		return False
 			
@@ -177,6 +157,26 @@ class Node: #creation of bootstap node
 		# check for the longer chain accroose all nodes
 
 		# mallon de mas xreiazetai
+		last_block = chain[0]
+		current_index = 1
+
+		while current_index < len(chain):
+			block = chain[current_index]
+			if block['previous_hash'] != hashlib.sha256(last_block.to_dict(include_nonce= False)+last_block['nonce']).hexdigest():
+				return False
+
+			# Check that the Proof of Work is correct
+			#Delete the reward transaction
+			
+			# Need to make sure that the dictionary is ordered. Otherwise we'll get a different hash
+			
+			if not self.valid_proof(block):
+				return False
+
+			last_block = block
+			current_index += 1
+
+		return True
 
 
 
