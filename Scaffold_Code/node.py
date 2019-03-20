@@ -160,20 +160,33 @@ class Node: #creation of bootstap node
 
 	def mine_block( self, _block):
 		print("I am mining")
-		self.isMining = True
-		# last_block = self.chain[-1]
+		#self.isMining = True
+		#### EDW THA PREPEI NA APOTHIKEUW TO PREVIOUSHASH gia to block pou tha kanw mine, wste na to
+		#### tsekarw otan teleiwsw to mining
+		last_block = self.chain[-1]
+		previousmessage = OrderedDict(
+						{'transactions': last_block['transactions'],
+						 'previousHash': last_block['previousHash'],
+						 #'nonce': self.nonce ,
+						 'number': last_block['number']
+						})
+		my_previous_hash = hashlib.sha256((str(previousmessage)+previousblock['nonce']).encode()).hexdigest()
 		message = _block.to_dict(include_nonce=False)
 		nonce = self.search_proof(message)
 		_block.add_nonce(nonce)
-		# +++++++ 
-		if not self.blockWhileMining:
-			self.chain.append(_block.to_dict())
+		# +++++++
+		last_block = self.chain[-1]
+		previousmessage = OrderedDict(
+						{'transactions': last_block['transactions'],
+						 'previousHash': last_block['previousHash'],
+						 #'nonce': self.nonce ,
+						 'number': last_block['number']
+						})
+		new_previous_hash = hashlib.sha256((str(previousmessage)+previousblock['nonce']).encode()).hexdigest()
+		if new_previous_hash == my_previous_hash:
+			# self.chain.append(_block.to_dict())
 			self.broadcast_block(_block.to_dict())
-			self.isMining = False
 			self.current_block = []
-		else:
-			#kati tha paiksei me ta verified transactions
-			self.validate_block(_block)
 		return
 
 	def broadcast_block(self,dict):
@@ -188,10 +201,10 @@ class Node: #creation of bootstap node
 
 	def receive_block(self, _block):
 		# print('i am broadcasting!!!!!!!')
-		if self.isMining == True:
-			self.blockWhileMining.append(_block)
-		else:
-			self.validate_block(_block)
+		self.validate_block(_block)
+
+
+
 		return
 
 	def search_proof(self, message):
@@ -214,7 +227,7 @@ class Node: #creation of bootstap node
 						})
 						#i mipos d = block.to_dict??
 		nonce = _block['nonce']
-		digest = hashlib.sha256(str(d) + nonce).hexdigest()
+		digest = hashlib.sha256((str(d) + nonce).encode()).hexdigest()
 		if ( digest.startswith('0' * config.difficulty)):
 			return True
 		else:
@@ -222,9 +235,9 @@ class Node: #creation of bootstap node
 		
 	#concencus functions
 
-	def validate_block(self,block):
+	def validate_block(self,_block):
 		#check proof of work 
-		flag1 = self.valid_proof(block)
+		flag1 = self.valid_proof(_block)
 		if (flag1):
 		#check previous hash
 			previousblock=self.chain[-1]
@@ -234,14 +247,14 @@ class Node: #creation of bootstap node
 						 #'nonce': self.nonce ,
 						 'number': previousblock['blocknumber']
 						})
-			previoushash = hashlib.sha256((previousmessage+previousblock['nonce']).hexdigest())
-			if (block['previous_hash'] != previoushash):
+			previoushash = hashlib.sha256((str(previousmessage)+previousblock['nonce']).encode()).hexdigest()
+			if (_block['previousHash'] != previoushash):
 				flag = self.resolve_conflicts()
 				if (flag==False): 
 					return False
 				return True
 			else: 
-				transactions=block['transactions']
+				transactions=_block['transactions']
 				#check  all that transactions in received block are verified
 				for t in transactions:
 					flag=0

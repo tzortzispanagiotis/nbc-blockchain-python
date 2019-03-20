@@ -95,6 +95,8 @@ def receive_transaction():
 @app.route('/receiveblock', methods = ['POST'])
 def receive_block():
     a = request.get_json(force=True)
+    _node.receive_block(a)
+    return jsonify(status="ok")
     
 # --------------------------------------- #    
 
