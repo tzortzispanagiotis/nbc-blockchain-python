@@ -4,6 +4,7 @@ from flask_cors import CORS
 
 # import block, chain, wallet, transaction
 import node
+import config
 
 app = Flask(__name__)
 CORS(app)
@@ -100,14 +101,32 @@ def receive_block():
     
 # --------------------------------------- #    
 
+# ENDPOINT USED FOR RESOLVE CONFLICTS     #
+# --------------------------------------- # 
+@app.route('/chainlength', methods = ['GET'])
+def chain_len():
+    _len = len(_node.chain)
+    return jsonify(length=_len)
+
+@app.route('/forcemine', methods = ['GET'])
+def force_mine():
+    _node.force_mine()
+    return jsonify(status="ok")
+
+@app.route('/chain', methods = ['GET'])
+def chain_send():
+    chain = _node.chain
+    return jsonify(chain=chain)
 if __name__ == '__main__':
     from argparse import ArgumentParser
     parser = ArgumentParser()
     parser.add_argument('-p', default=5000, help='port to listen on')
+    parser.add_argument('-diff', default=4, help='set difficulty of POW')
     parser.add_argument('-ip', help='ip to listen on')
     parser.add_argument('-bip', help='bootstrap ip, -1 if bootstrap')
     parser.add_argument('-bport', help='bootstrap port, -1 if bootstrap')
     args = parser.parse_args()
+    config.difficulty = int(args.diff)
     port = args.p
     _node = node.Node(args.ip, args.p, args.bip, args.bport)
     app.run(host='127.0.0.1', port=port)

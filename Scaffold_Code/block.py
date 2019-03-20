@@ -17,14 +17,16 @@ class GenesisBlock:
 			d = OrderedDict({
 				'transactions': self.listOfTransactions,
 				'previousHash': self._previousHash,
-				'number': self.blocknumber
+				'number': self.blocknumber,
+				'timestamp': str(self._timestamp)
 			})
 		else:
 			d = OrderedDict({
 				'transactions': self.listOfTransactions,
 				'previousHash': self._previousHash,
-				'nonce': self.nonce,
-				'number': self.blocknumber
+				'number': self.blocknumber,
+				'timestamp': str(self._timestamp),
+				'nonce': self.nonce
 			})
 		return d
 		
@@ -46,14 +48,16 @@ class Block:
 			d = OrderedDict({
 				'transactions': self.listOfTransactions,
 				'previousHash': self._previousHash,
-				'number': self.blocknumber
+				'number': self.blocknumber,
+				'timestamp': str(self._timestamp)
 			})
 		else:
 			d = OrderedDict({
 				'transactions': self.listOfTransactions,
 				'previousHash': self._previousHash,
-				'nonce': self.nonce,
-				'number': self.blocknumber
+				'number': self.blocknumber,
+				'timestamp': str(self._timestamp),
+				'nonce': self.nonce
 			})
 		return d
 

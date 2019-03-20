@@ -30,8 +30,12 @@ class Node: #creation of bootstap node
 			'ip'   : ip,
 			'port' : port
 		}] 
+		self.bcounter = 0
 		self.isMining = False 
+		self.usingChain = False
+		self.resolvingConflicts = False
 		self.blockWhileMining = []
+		self.mining_useless = False
 		 #here we store information for every node, as its id, its address (ip:port) its public key and its balance 
 	#def create_new_block(previousHash): #an einai to proto 
 		
@@ -106,7 +110,7 @@ class Node: #creation of bootstap node
 			out = transaction.TransactionOutput(i['receiver_address'] , i['amount'])
 			self.UTXO.append(out)
 
-	def validate_transaction(self, _transaction):
+	def validate_transaction(self, _transaction, resolve_confl = False):
 		tr = {"sender": _transaction['sender'],
 			 "receiver": _transaction['receiver'],
              "amount": _transaction['amount'],
@@ -132,24 +136,53 @@ class Node: #creation of bootstap node
 				out2=transaction.TransactionOutput(_transaction['sender'] ,sum1-_transaction['amount'])
 				self.UTXO.append(out1)
 				self.UTXO.append(out2)
-				self.verified_transactions.append(_transaction)
+				if not resolve_confl:
+					self.verified_transactions.append(_transaction)
 				# print(self.verified_transactions)
 			return True
 		else:
 			return False
-		
+
+	def force_mine(self):
+		while self.isMining:
+			pass
+		for i in range(config.max_transactions):
+			self.current_block.append(self.verified_transactions[i])
+
+		print ("mpika man")	
+		previousblock = self.chain[-1]
+		previousmessage = OrderedDict(
+				{'transactions': previousblock['transactions'],
+					'previousHash':  previousblock['previousHash'],
+					#'nonce': self.nonce ,
+					'number': previousblock['number'],
+					'timestamp': previousblock['timestamp']
+				})
+		previoushash = hashlib.sha256((str(previousmessage)+previousblock['nonce']).encode()).hexdigest()
+		new_block = block.Block(previoushash, self.current_block, previousblock['number'])
+		# self.current_block = []
+		# new_block.myHash()
+		self.mine_block(new_block)
+		return
+
 	def add_transaction_to_block(self, _transaction ):
+		while self.resolvingConflicts:
+			pass
 		if self.validate_transaction(_transaction):
-			self.current_block.append(_transaction)
+			# self.current_block.append(_transaction)
 			# print (len(self.current_block))
-			if len(self.current_block) == config.max_transactions:
-				print ("mpika man")
+			if len(self.verified_transactions) >= config.max_transactions and not self.isMining:
+				for i in range(config.max_transactions):
+					self.current_block.append(self.verified_transactions[i])
+
+				print ("mpika man")	
 				previousblock = self.chain[-1]
 				previousmessage = OrderedDict(
 						{'transactions': previousblock['transactions'],
 						 'previousHash':  previousblock['previousHash'],
 						 #'nonce': self.nonce ,
-						 'number': previousblock['number']
+						 'number': previousblock['number'],
+						 'timestamp': previousblock['timestamp']
 						})
 				previoushash = hashlib.sha256((str(previousmessage)+previousblock['nonce']).encode()).hexdigest()
 				new_block = block.Block(previoushash, self.current_block, previousblock['number'])
@@ -160,70 +193,86 @@ class Node: #creation of bootstap node
 
 	def mine_block( self, _block):
 		print("I am mining")
-		#self.isMining = True
+		self.isMining = True
 		#### EDW THA PREPEI NA APOTHIKEUW TO PREVIOUSHASH gia to block pou tha kanw mine, wste na to
 		#### tsekarw otan teleiwsw to mining
 		last_block = self.chain[-1]
 		previousmessage = OrderedDict(
 						{'transactions': last_block['transactions'],
 						 'previousHash': last_block['previousHash'],
+						 'timestamp': last_block['timestamp'],
+
 						 #'nonce': self.nonce ,
 						 'number': last_block['number']
 						})
-		my_previous_hash = hashlib.sha256((str(previousmessage)+previousblock['nonce']).encode()).hexdigest()
+		my_previous_hash = hashlib.sha256((str(previousmessage)+last_block['nonce']).encode()).hexdigest()
 		message = _block.to_dict(include_nonce=False)
 		nonce = self.search_proof(message)
 		_block.add_nonce(nonce)
+
+
 		# +++++++
+		while self.usingChain:
+			pass
+		self.usingChain = True
 		last_block = self.chain[-1]
+		self.usingChain = False
 		previousmessage = OrderedDict(
 						{'transactions': last_block['transactions'],
 						 'previousHash': last_block['previousHash'],
+						 'timestamp': last_block['timestamp'],
 						 #'nonce': self.nonce ,
 						 'number': last_block['number']
 						})
-		new_previous_hash = hashlib.sha256((str(previousmessage)+previousblock['nonce']).encode()).hexdigest()
+		new_previous_hash = hashlib.sha256((str(previousmessage)+last_block['nonce']).encode()).hexdigest()
 		if new_previous_hash == my_previous_hash:
 			# self.chain.append(_block.to_dict())
 			self.broadcast_block(_block.to_dict())
 			self.current_block = []
+		self.isMining = False
 		return
 
 	def broadcast_block(self,dict):
-		# print('i am broadcasting!!!!!!!')
+		print('i am broadcasting!!!!!!!')
 		body = json.dumps(dict)
 		futures = []
 		for i in self.ring:
-			if i['ip'] != self.ip and i['port'] != self.port:
-				target_url = 'http://'+i['ip']+':'+i['port']+'/receiveblock'
-				futures.append(pool.apply_async(requests.post, [target_url,body]))
+			target_url = 'http://'+i['ip']+':'+i['port']+'/receiveblock'
+			futures.append(pool.apply_async(requests.post, [target_url,body]))
 		return
 
 	def receive_block(self, _block):
 		# print('i am broadcasting!!!!!!!')
+		while self.usingChain:
+			pass
+		self.usingChain = True
 		self.validate_block(_block)
-
-
-
+		self.usingChain = False
 		return
 
 	def search_proof(self, message):
 		i = 0
 		prefix = '0' * config.difficulty
-		while True:
+		self.mining_useless = False
+		while not self.mining_useless:
 			nonce = str(i)
 			digest = hashlib.sha256((str(message) + nonce).encode()).hexdigest()
 			if digest.startswith(prefix):
 				print(digest)
 				return nonce
 			i += 1
+		if self.mining_useless == True:
+			print("Mining process interrupted, block was mined somewhere else :(\n")
+		
+		
 
 
 	def valid_proof(self , _block):
 		d = OrderedDict({'transactions': _block['transactions'],
 						 'previousHash':  _block['previousHash'],
 						 #'nonce': self.nonce ,
-						 'number': _block['blocknumber']
+						 'number': _block['number'],
+						 'timestamp': _block['timestamp']
 						})
 						#i mipos d = block.to_dict??
 		nonce = _block['nonce']
@@ -245,15 +294,18 @@ class Node: #creation of bootstap node
 						{'transactions': previousblock['transactions'],
 						 'previousHash':  previousblock['previousHash'],
 						 #'nonce': self.nonce ,
-						 'number': previousblock['blocknumber']
+						 'number': previousblock['number'],
+						 'timestamp': previousblock['timestamp']
 						})
 			previoushash = hashlib.sha256((str(previousmessage)+previousblock['nonce']).encode()).hexdigest()
 			if (_block['previousHash'] != previoushash):
+				print("wrong prev hash")
 				flag = self.resolve_conflicts()
 				if (flag==False): 
 					return False
 				return True
 			else: 
+				self.mining_useless = True
 				transactions=_block['transactions']
 				#check  all that transactions in received block are verified
 				for t in transactions:
@@ -269,11 +321,7 @@ class Node: #creation of bootstap node
 					for vt in self.verified_transactions:
 						if t['id']==vt['id'] :
 							self.verified_transactions.remove(vt)
-			
-					for mytrans in self.current_block:
-						if (t.transaction_id == mytrans.transaction_id):
-							self.current_block.remove(mytrans) 
-				self.chain.append(block)
+				self.chain.append(_block)
 				return True
 		return False
 			
@@ -305,9 +353,36 @@ class Node: #creation of bootstap node
 
 		return True
 
-
-
 	def resolve_conflicts(self):
+		print("ENTERED RESOLVE CONFL")
+		max_chain = -1
+		node_max_chain = None
+		for i in self.ring:
+			r = requests.get('http://'+i['ip']+':'+i['port']+'/chainlength')
+			res = r.json()
+			if res['length'] > max_chain:
+				max_chain = res['length']
+				node_max_chain = i
+		r = requests.get('http://'+i['ip']+':'+i['port']+'/chain')
+		res = r.json()
+		chain = res['chain']
+		self.resolvingConflicts = True #LOCK THE TRANSACTIONS
+		self.UTXO = [] # new utxo list
+		for bloc in chain: # foreach 
+			trans = bloc['transactions']
+			for t in trans: # foreach transaction in block
+				if bloc['number'] == 0:
+					out = transaction.TransactionOutput(t['receiver_address'] , t['amount'])
+					self.UTXO.append(out)
+				else:
+					self.validate_transaction(t, True)
+					try:
+						self.verified_transactions.remove(t)
+					except ValueError:
+						pass
+		for tr in self.verified_transactions:
+			self.validate_transaction(tr, True)
+		self.resolvingConflicts = False
 		return True
 	# resolve correct chain
 	#changed = False
