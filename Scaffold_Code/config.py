@@ -1,3 +1,3 @@
 max_transactions = 2
-difficulty = 7
+difficulty = 4
 numofnodes = 2

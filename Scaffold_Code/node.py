@@ -29,7 +29,9 @@ class Node: #creation of bootstap node
 			'pkey' : self.wallet.address,
 			'ip'   : ip,
 			'port' : port
-		}]  
+		}] 
+		self.isMining = False 
+		self.blockWhileMining = []
 		 #here we store information for every node, as its id, its address (ip:port) its public key and its balance 
 	#def create_new_block(previousHash): #an einai to proto 
 		
@@ -139,7 +141,7 @@ class Node: #creation of bootstap node
 	def add_transaction_to_block(self, _transaction ):
 		if self.validate_transaction(_transaction):
 			self.current_block.append(_transaction)
-			print (len(self.current_block))
+			# print (len(self.current_block))
 			if len(self.current_block) == config.max_transactions:
 				print ("mpika man")
 				previousblock = self.chain[-1]
@@ -151,24 +153,45 @@ class Node: #creation of bootstap node
 						})
 				previoushash = hashlib.sha256((str(previousmessage)+previousblock['nonce']).encode()).hexdigest()
 				new_block = block.Block(previoushash, self.current_block, previousblock['number'])
-				self.current_block = []
+				# self.current_block = []
 				# new_block.myHash()
 				self.mine_block(new_block)
 				return
 
 	def mine_block( self, _block):
 		print("I am mining")
-		last_block = self.chain[-1]
+		self.isMining = True
+		# last_block = self.chain[-1]
 		message = _block.to_dict(include_nonce=False)
 		nonce = self.search_proof(message)
 		_block.add_nonce(nonce)
 		# +++++++ 
-		self.chain.append(_block.to_dict())
-		self.broadcast_block()
+		if not self.blockWhileMining:
+			self.chain.append(_block.to_dict())
+			self.broadcast_block(_block.to_dict())
+			self.isMining = False
+			self.current_block = []
+		else:
+			#kati tha paiksei me ta verified transactions
+			self.validate_block(_block)
 		return
 
-	def broadcast_block(self):
-		print('i am broadcasting!!!!!!!')
+	def broadcast_block(self,dict):
+		# print('i am broadcasting!!!!!!!')
+		body = json.dumps(dict)
+		futures = []
+		for i in self.ring:
+			if i['ip'] != self.ip and i['port'] != self.port:
+				target_url = 'http://'+i['ip']+':'+i['port']+'/receiveblock'
+				futures.append(pool.apply_async(requests.post, [target_url,body]))
+		return
+
+	def receive_block(self, _block):
+		# print('i am broadcasting!!!!!!!')
+		if self.isMining == True:
+			self.blockWhileMining.append(_block)
+		else:
+			self.validate_block(_block)
 		return
 
 	def search_proof(self, message):
@@ -199,7 +222,7 @@ class Node: #creation of bootstap node
 		
 	#concencus functions
 
-	def validate_block(self ,block):
+	def validate_block(self,block):
 		#check proof of work 
 		flag1 = self.valid_proof(block)
 		if (flag1):
