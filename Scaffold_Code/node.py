@@ -28,7 +28,8 @@ class Node: #creation of bootstap node
 		self.ring = [{
 			'pkey' : self.wallet.address,
 			'ip'   : ip,
-			'port' : port
+			'port' : port,
+			'id'   : int(port) % 10 #works for up to 10 nodesS
 		}] 
 		self.bcounter = 0
 		self.isMining = False 
@@ -48,7 +49,8 @@ class Node: #creation of bootstap node
 		temp = {
 				'pkey' : newNode['pkey'],
 				'ip'		: newNode['ip'],
-				'port'   : newNode['port']
+				'port'   : newNode['port'],
+				'id'   : int(newNode['port']) % 10
 			}
 		self.ring.append(temp)
 		# print(self.ring)
@@ -101,6 +103,8 @@ class Node: #creation of bootstap node
 		for i in self.ring:
 			target_url = 'http://'+i['ip']+':'+i['port']+'/receivetransaction'
 			futures.append(pool.apply_async(requests.post, [target_url,body]))
+		for future in futures:
+			print(future.get())	
 
 	def getGenesisBlock(self,gblock):
 		#put genesis block in chain
@@ -143,27 +147,29 @@ class Node: #creation of bootstap node
 		else:
 			return False
 
-	def force_mine(self):
-		while self.isMining:
-			pass
-		for i in range(config.max_transactions):
-			self.current_block.append(self.verified_transactions[i])
-
-		print ("mpika man")	
-		previousblock = self.chain[-1]
-		previousmessage = OrderedDict(
-				{'transactions': previousblock['transactions'],
-					'previousHash':  previousblock['previousHash'],
-					#'nonce': self.nonce ,
-					'number': previousblock['number'],
-					'timestamp': previousblock['timestamp']
-				})
-		previoushash = hashlib.sha256((str(previousmessage)+previousblock['nonce']).encode()).hexdigest()
-		new_block = block.Block(previoushash, self.current_block, previousblock['number'])
-		# self.current_block = []
-		# new_block.myHash()
-		self.mine_block(new_block)
-		return
+	# def force_mine(self):
+	# 	while self.isMining:
+	# 		pass
+	# 	if len(verified_transactions) >= config.max_transactions):
+	# 		for i in range(config.max_transactions):
+	# 			self.current_block.append(self.verified_transactions[i])
+	# 	else:
+	# 		return 42
+	# 	print ("mpika man")	
+	# 	previousblock = self.chain[-1]
+	# 	previousmessage = OrderedDict(
+	# 			{'transactions': previousblock['transactions'],
+	# 				'previousHash':  previousblock['previousHash'],
+	# 				#'nonce': self.nonce ,
+	# 				'number': previousblock['number'],
+	# 				'timestamp': previousblock['timestamp']
+	# 			})
+	# 	previoushash = hashlib.sha256((str(previousmessage)+previousblock['nonce']).encode()).hexdigest()
+	# 	new_block = block.Block(previoushash, self.current_block, previousblock['number'])
+	# 	# self.current_block = []
+	# 	# new_block.myHash()
+	# 	self.mine_block(new_block)
+	# 	return 0
 
 	def add_transaction_to_block(self, _transaction ):
 		while self.resolvingConflicts:
@@ -209,7 +215,9 @@ class Node: #creation of bootstap node
 		message = _block.to_dict(include_nonce=False)
 		nonce = self.search_proof(message)
 		_block.add_nonce(nonce)
-
+		if nonce == "nope":
+			self.isMining = False
+			return
 
 		# +++++++
 		while self.usingChain:
@@ -239,6 +247,8 @@ class Node: #creation of bootstap node
 		for i in self.ring:
 			target_url = 'http://'+i['ip']+':'+i['port']+'/receiveblock'
 			futures.append(pool.apply_async(requests.post, [target_url,body]))
+		# for future in futures:
+		# 	print(future.get())			
 		return
 
 	def receive_block(self, _block):
@@ -263,7 +273,7 @@ class Node: #creation of bootstap node
 			i += 1
 		if self.mining_useless == True:
 			print("Mining process interrupted, block was mined somewhere else :(\n")
-		
+			return "nope"
 		
 
 
@@ -275,7 +285,13 @@ class Node: #creation of bootstap node
 						 'timestamp': _block['timestamp']
 						})
 						#i mipos d = block.to_dict??
+		print("I received block, i check the proof. block is:")
+		# print(d)
+		print("nonce:")
+
+		
 		nonce = _block['nonce']
+		# print(nonce)
 		digest = hashlib.sha256((str(d) + nonce).encode()).hexdigest()
 		if ( digest.startswith('0' * config.difficulty)):
 			return True
@@ -298,6 +314,19 @@ class Node: #creation of bootstap node
 						 'timestamp': previousblock['timestamp']
 						})
 			previoushash = hashlib.sha256((str(previousmessage)+previousblock['nonce']).encode()).hexdigest()
+			if len(self.chain) >= 2:
+				previousblock=self.chain[-2]
+				previousmessage = OrderedDict(
+							{'transactions': previousblock['transactions'],
+							'previousHash':  previousblock['previousHash'],
+							#'nonce': self.nonce ,
+							'number': previousblock['number'],
+							'timestamp': previousblock['timestamp']
+							})
+				previoushash_2 = hashlib.sha256((str(previousmessage)+previousblock['nonce']).encode()).hexdigest()
+				if _block['previousHash'] == previoushash_2:
+					return False	
+			
 			if (_block['previousHash'] != previoushash):
 				print("wrong prev hash")
 				flag = self.resolve_conflicts()
@@ -361,9 +390,9 @@ class Node: #creation of bootstap node
 			r = requests.get('http://'+i['ip']+':'+i['port']+'/chainlength')
 			res = r.json()
 			if res['length'] > max_chain:
-				max_chain = res['length']
+				node_max_chain = res['length']
 				node_max_chain = i
-		r = requests.get('http://'+i['ip']+':'+i['port']+'/chain')
+		r = requests.get('http://'+node_max_chain['ip']+':'+node_max_chain['port']+'/chain')
 		res = r.json()
 		chain = res['chain']
 		self.resolvingConflicts = True #LOCK THE TRANSACTIONS

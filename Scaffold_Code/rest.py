@@ -79,7 +79,12 @@ def receive_wallets():
 @app.route('/createtransaction', methods = ['POST'])
 def create_transaction():
     a = request.get_json(force=True)
-    _wallet = a['receiver_address']
+    id = a['id']
+    ring = _node.ring
+    _wallet = None
+    for i in ring:
+        if id == i['id']:
+            _wallet = i['pkey']
     amount = a['amount']
     new_transaction = _node.create_transaction(_wallet, amount)
     _node.broadcast_transaction(new_transaction)
@@ -108,10 +113,27 @@ def chain_len():
     _len = len(_node.chain)
     return jsonify(length=_len)
 
-@app.route('/forcemine', methods = ['GET'])
-def force_mine():
-    _node.force_mine()
-    return jsonify(status="ok")
+# @app.route('/forceminetrigger', methods = ['GET'])
+# def force_mine():
+#     force_result = _node.force_mine()
+#     if force_result == 0:
+#         return jsonify(status="did something")
+#     else:
+#         return jsonify(status="all work done")
+
+# @app.route('/forceminetrigger', methods = ['GET'])
+# def force_mine():
+#     force_result = _node.force_mine()
+#     if force_result == 0:
+#         return jsonify(status="did something")
+#     else:
+#         return jsonify(status="all work done")
+
+
+
+
+
+
 
 @app.route('/chain', methods = ['GET'])
 def chain_send():
