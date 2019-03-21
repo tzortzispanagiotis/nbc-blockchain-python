@@ -39,7 +39,13 @@ class Node: #creation of bootstap node
 		self.mining_useless = False
 		 #here we store information for every node, as its id, its address (ip:port) its public key and its balance 
 	#def create_new_block(previousHash): #an einai to proto 
-		
+
+	def continuous_mining(self):
+		print("STARTED CONTINUOUS WORK")
+		while True:	 
+			if len(self.verified_transactions) >= config.max_transactions and not self.current_block:
+				self.mine_job()
+
 	def create_wallet(self):
 		##create a wallet for this node, with a public key and a private key
 		return wallet.Wallet()
@@ -171,31 +177,25 @@ class Node: #creation of bootstap node
 	# 	self.mine_block(new_block)
 	# 	return 0
 
-	def add_transaction_to_block(self, _transaction ):
-		while self.resolvingConflicts:
-			pass
-		if self.validate_transaction(_transaction):
-			# self.current_block.append(_transaction)
-			# print (len(self.current_block))
-			if len(self.verified_transactions) >= config.max_transactions and not self.isMining:
-				for i in range(config.max_transactions):
-					self.current_block.append(self.verified_transactions[i])
+	def mine_job(self):
+		for i in range(config.max_transactions):
+			self.current_block.append(self.verified_transactions[i])
 
-				print ("mpika man")	
-				previousblock = self.chain[-1]
-				previousmessage = OrderedDict(
-						{'transactions': previousblock['transactions'],
-						 'previousHash':  previousblock['previousHash'],
-						 #'nonce': self.nonce ,
-						 'number': previousblock['number'],
-						 'timestamp': previousblock['timestamp']
-						})
-				previoushash = hashlib.sha256((str(previousmessage)+previousblock['nonce']).encode()).hexdigest()
-				new_block = block.Block(previoushash, self.current_block, previousblock['number'])
-				# self.current_block = []
-				# new_block.myHash()
-				self.mine_block(new_block)
-				return
+		print ("mpika man")	
+		previousblock = self.chain[-1]
+		previousmessage = OrderedDict(
+				{'transactions': previousblock['transactions'],
+					'previousHash':  previousblock['previousHash'],
+					#'nonce': self.nonce ,
+					'number': previousblock['number'],
+					'timestamp': previousblock['timestamp']
+				})
+		previoushash = hashlib.sha256((str(previousmessage)+previousblock['nonce']).encode()).hexdigest()
+		new_block = block.Block(previoushash, self.current_block, previousblock['number'])
+		# self.current_block = []
+		# new_block.myHash()
+		self.mine_block(new_block)
+		return
 
 	def mine_block( self, _block):
 		print("I am mining")
@@ -247,8 +247,8 @@ class Node: #creation of bootstap node
 		for i in self.ring:
 			target_url = 'http://'+i['ip']+':'+i['port']+'/receiveblock'
 			futures.append(pool.apply_async(requests.post, [target_url,body]))
-		# for future in futures:
-		# 	print(future.get())			
+		for future in futures:
+			print(future.get())			
 		return
 
 	def receive_block(self, _block):
@@ -351,6 +351,7 @@ class Node: #creation of bootstap node
 						if t['id']==vt['id'] :
 							self.verified_transactions.remove(vt)
 				self.chain.append(_block)
+				self.current_block = []
 				return True
 		return False
 			

@@ -95,7 +95,7 @@ def receive_transaction():
     a = request.get_json(force=True)
     # print("I ENTERED RECEIVE, HERE'S THE TRANSACTION")
     # print(a)
-    _node.add_transaction_to_block(a)
+    _node.validate_transaction(a)
     return jsonify(status="ok")
 
 @app.route('/receiveblock', methods = ['POST'])
@@ -113,13 +113,9 @@ def chain_len():
     _len = len(_node.chain)
     return jsonify(length=_len)
 
-# @app.route('/forceminetrigger', methods = ['GET'])
-# def force_mine():
-#     force_result = _node.force_mine()
-#     if force_result == 0:
-#         return jsonify(status="did something")
-#     else:
-#         return jsonify(status="all work done")
+@app.route('/startwork', methods = ['GET'])
+def try_mine():
+    _node.continuous_mining()
 
 # @app.route('/forceminetrigger', methods = ['GET'])
 # def force_mine():
@@ -151,4 +147,5 @@ if __name__ == '__main__':
     config.difficulty = int(args.diff)
     port = args.p
     _node = node.Node(args.ip, args.p, args.bip, args.bport)
+
     app.run(host='127.0.0.1', port=port)
