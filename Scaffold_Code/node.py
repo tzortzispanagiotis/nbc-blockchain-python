@@ -7,7 +7,7 @@ import block
 import wallet
 import config
 import transaction
-
+import time
 pool = Pool(100)
 
 class Node: #creation of bootstap node
@@ -37,6 +37,11 @@ class Node: #creation of bootstap node
 		self.resolvingConflicts = False
 		self.blockWhileMining = []
 		self.mining_useless = False
+		self.start_time = None
+		self.end_time = None
+		self.total_time = None
+		self.tcounter = 0
+		self.stop_if_empty = False
 		 #here we store information for every node, as its id, its address (ip:port) its public key and its balance 
 	#def create_new_block(previousHash): #an einai to proto 
 
@@ -45,6 +50,10 @@ class Node: #creation of bootstap node
 		while True:	 
 			if len(self.verified_transactions) >= config.max_transactions and not self.current_block:
 				self.mine_job()
+			if len(self.verified_transactions) < config.max_transactions and self.stop_if_empty:
+				self.end_time = time.time()
+				self.total_time = self.end_time - self.start_time
+				self.stop_if_empty = False
 
 	def create_wallet(self):
 		##create a wallet for this node, with a public key and a private key

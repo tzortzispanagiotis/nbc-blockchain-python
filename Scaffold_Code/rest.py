@@ -1,4 +1,4 @@
-import requests, json
+import requests, json, time
 from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
 
@@ -92,6 +92,9 @@ def create_transaction():
     
 @app.route('/receivetransaction', methods = ['POST'])
 def receive_transaction():
+    _node.tcounter+=1
+    if _node.tcounter == 10*config.numofnodes:
+        _node.stop_if_empty = True
     a = request.get_json(force=True)
     # print("I ENTERED RECEIVE, HERE'S THE TRANSACTION")
     # print(a)
@@ -117,6 +120,21 @@ def chain_len():
 def try_mine():
     _node.continuous_mining()
 
+
+
+
+@app.route('/timerstart', methods = ['GET'])
+def start_timer():
+    _node.start_time = time.time()
+    return jsonify(status="ok")
+
+@app.route('/totaltime', methods = ['GET'])
+def get_timer():
+    ret = _node.total_time
+    return jsonify(time=ret)
+
+
+
 # @app.route('/forceminetrigger', methods = ['GET'])
 # def force_mine():
 #     force_result = _node.force_mine()
@@ -135,6 +153,8 @@ def try_mine():
 def chain_send():
     chain = _node.chain
     return jsonify(chain=chain)
+
+
 if __name__ == '__main__':
     from argparse import ArgumentParser
     parser = ArgumentParser()
