@@ -37,10 +37,17 @@ class Node: #creation of bootstap node
 		self.resolvingConflicts = False
 		self.blockWhileMining = []
 		self.mining_useless = False
+		# for measuring time of total transactions
 		self.start_time = None
 		self.end_time = None
 		self.total_time = None
 		self.tcounter = 0
+		# for measuring block time
+		self.btcounter = 0
+		self.btstart = None
+		self.btend = None
+		self.btsum = 0
+
 		self.stop_if_empty = False
 		 #here we store information for every node, as its id, its address (ip:port) its public key and its balance 
 	#def create_new_block(previousHash): #an einai to proto 
@@ -270,6 +277,7 @@ class Node: #creation of bootstap node
 		return
 
 	def search_proof(self, message):
+		self.btstart = time.time()
 		i = 0
 		prefix = '0' * config.difficulty
 		self.mining_useless = False
@@ -278,6 +286,9 @@ class Node: #creation of bootstap node
 			digest = hashlib.sha256((str(message) + nonce).encode()).hexdigest()
 			if digest.startswith(prefix):
 				print(digest)
+				self.btend = time.time()
+				self.btsum += self.btend - self.btstart
+				self.btcounter += 1
 				return nonce
 			i += 1
 		if self.mining_useless == True:

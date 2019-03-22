@@ -132,7 +132,11 @@ def start_timer():
 @app.route('/totaltime', methods = ['GET'])
 def get_timer():
     ret = _node.total_time
-    return jsonify(time=ret)
+    if _node.btcounter == 0:
+        return jsonify(time_transactions=ret,avg_time_mine=0,blocks_mined=0)
+    else:
+        ret_block = _node.btsum / _node.btcounter
+        return jsonify(time_transactions=ret,avg_time_mine=ret_block,blocks_mined = _node.btcounter)
 
 
 
