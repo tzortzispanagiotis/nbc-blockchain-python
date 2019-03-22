@@ -39,8 +39,9 @@ def add_node():
     newNode['pkey'] = a['pkey']
     newNode['ip'] = a['ip']
     newNode['port'] = a['port']
-    # print(newNode)
+    print(newNode)
     _node.register_node_to_ring(newNode)
+    print('edw3')
     return jsonify(status='successful')
 # --------------------------------------- #
 
@@ -168,4 +169,4 @@ if __name__ == '__main__':
     port = args.p
     _node = node.Node(args.ip, args.p, args.bip, args.bport)
 
-    app.run(host='127.0.0.1', port=port)
+    app.run(host='0.0.0.0', port=port, threaded=True)

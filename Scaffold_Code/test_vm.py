@@ -69,8 +69,8 @@ if __name__ == '__main__':
 
     r = requests.get(node['1']+'/selfregister')
     r = requests.get(node['2']+'/selfregister')
-    r = requests.get(node['3']+'/selfregister')
     r = requests.get(node['4']+'/selfregister')
+    r = requests.get(node['3']+'/selfregister')
 
     r = requests.get(node['0']+'/timerstart')
     r = requests.get(node['1']+'/timerstart')
