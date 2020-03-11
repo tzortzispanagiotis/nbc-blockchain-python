@@ -3,15 +3,40 @@ import hashlib
 import json
 import datetime
 
+class GenesisBlock:
+	def __init__(self, genesis_tr):
+		print("a")
+		self._previousHash = 0
+		self._timestamp = datetime.datetime.now()
+		self.listOfTransactions = genesis_tr
+		self.blocknumber = 0
+		self.nonce = "0"
 
+	def to_dict(self, include_nonce = True):
+		if include_nonce == False:
+			d = OrderedDict({
+				'transactions': self.listOfTransactions,
+				'previousHash': self._previousHash,
+				'number': self.blocknumber,
+				'timestamp': str(self._timestamp)
+			})
+		else:
+			d = OrderedDict({
+				'transactions': self.listOfTransactions,
+				'previousHash': self._previousHash,
+				'number': self.blocknumber,
+				'timestamp': str(self._timestamp),
+				'nonce': self.nonce
+			})
+		return d
+		
 class Block:
-	def __init__(self, previousHash, currentbl):
+	def __init__(self, previousHash, listoftransactions, last_block):
 		##set
-
 		self._previousHash = previousHash
 		self._timestamp = datetime.datetime.now()
-		self.listOfTransactions = []
-		self.blocknumber = currentbl.getblocknum()+1
+		self.listOfTransactions = listoftransactions
+		self.blocknumber = last_block+1
 		self.nonce = None
 		#self.currenthash = None
 
@@ -23,14 +48,16 @@ class Block:
 			d = OrderedDict({
 				'transactions': self.listOfTransactions,
 				'previousHash': self._previousHash,
-				'number': self.blocknumber
+				'number': self.blocknumber,
+				'timestamp': str(self._timestamp)
 			})
 		else:
 			d = OrderedDict({
 				'transactions': self.listOfTransactions,
 				'previousHash': self._previousHash,
-				'nonce': self.nonce,
-				'number': self.blocknumber
+				'number': self.blocknumber,
+				'timestamp': str(self._timestamp),
+				'nonce': self.nonce
 			})
 		return d
 

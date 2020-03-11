@@ -1,0 +1,10 @@
+id6 10
+id6 7
+id8 6
+id5 2
+id2 10
+id8 9
+id1 1
+id3 8
+id9 2
+id6 2
